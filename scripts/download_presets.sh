@@ -80,6 +80,7 @@ for preset in "${PRESETS[@]}"; do
             echo "Preset: WAN_ANIMATE (Wan Animate)"
             download_if_missing "https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/Wan22Animate/Wan2_2-Animate-14B_fp8_e4m3fn_scaled_KJ.safetensors" "/workspace/ComfyUI/models/diffusion_models"
             download_if_missing "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors" "/workspace/ComfyUI/models/vae"
+            download_if_missing "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_fp32.safetensors" "/workspace/ComfyUI/models/vae"
             download_if_missing "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors" "/workspace/ComfyUI/models/text_encoders"
             download_if_missing "https://huggingface.co/OreX/Models/resolve/main/WAN/clip_vision_h.safetensors" "/workspace/ComfyUI/models/clip_vision"
             download_if_missing "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22_relight/WanAnimate_relight_lora_fp16.safetensors" "/workspace/ComfyUI/models/loras"
