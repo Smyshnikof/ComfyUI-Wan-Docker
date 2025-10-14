@@ -1,4 +1,4 @@
-[![Build and Push Docker Images](https://github.com/somb1/ComfyUI-Docker/actions/workflows/build.yml/badge.svg)](https://github.com/somb1/ComfyUI-Docker/actions/workflows/build.yml)
+[![Build and Push Docker Images](https://github.com/Smyshnikof/ComfyUI-Wan-Docker/actions/workflows/build.yml/badge.svg)](https://github.com/Smyshnikof/ComfyUI-Wan-Docker/actions/workflows/build.yml)
 
 > 🎥 **Основан на серии роликов по Wan 2.2** от [Егор Смышников](https://www.youtube.com/playlist?list=PLUREBJZfEOoPztQiVSV7vYegAsOtwMiZi)
 
@@ -33,7 +33,7 @@
 ## 🏷️ Формат тегов
 
 ```text
-smyshnikof/comfyui:(A)-torch2.8.0-(B)
+smyshnikof/comfyui-wan:(A)-torch2.8.0-(B)
 ```
 
 * **(A)**: `base` - основной образ
@@ -46,9 +46,9 @@ smyshnikof/comfyui:(A)-torch2.8.0-(B)
 
 | Имя образа                                 | Кастомные ноды | Пресеты | CUDA |
 | ------------------------------------------ | ------------ | ---- | ---- |
-| `smyshnikof/comfyui:base-torch2.8.0-cu124`| ✅ Да         | ✅ Да  | 12.4 |
-| `smyshnikof/comfyui:base-torch2.8.0-cu126`| ✅ Да         | ✅ Да  | 12.6 |
-| `smyshnikof/comfyui:base-torch2.8.0-cu128`| ✅ Да         | ✅ Да  | 12.8 |
+| `smyshnikof/comfyui-wan:base-torch2.8.0-cu124`| ✅ Да         | ✅ Да  | 12.4 |
+| `smyshnikof/comfyui-wan:base-torch2.8.0-cu126`| ✅ Да         | ✅ Да  | 12.6 |
+| `smyshnikof/comfyui-wan:base-torch2.8.0-cu128`| ✅ Да         | ✅ Да  | 12.8 |
 
 > 👉 Для переключения: **Edit Pod/Template** → установите `Container Image`.
 
@@ -58,13 +58,13 @@ smyshnikof/comfyui:(A)-torch2.8.0-(B)
 
 | Видеокарта | Рекомендуемый образ | Примечание |
 |------------|-------------------|------------|
-| **RTX 5090** | `smyshnikof/comfyui:base-torch2.8.0-cu128` | Требует CUDA 12.8+ для SageAttention2 |
-| **RTX 5080** | `smyshnikof/comfyui:base-torch2.8.0-cu128` | Требует CUDA 12.8+ для SageAttention2 |
-| **RTX 4090** | `smyshnikof/comfyui:base-torch2.8.0-cu126` | Оптимальная производительность |
-| **RTX 4080** | `smyshnikof/comfyui:base-torch2.8.0-cu126` | Отличная совместимость |
-| **RTX 4070** | `smyshnikof/comfyui:base-torch2.8.0-cu124` | Стабильная работа |
-| **RTX 3090** | `smyshnikof/comfyui:base-torch2.8.0-cu124` | Совместимость с Ampere |
-| **RTX 3080** | `smyshnikof/comfyui:base-torch2.8.0-cu124` | Совместимость с Ampere |
+| **RTX 5090** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu128` | Требует CUDA 12.8+ для SageAttention2 |
+| **RTX 5080** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu128` | Требует CUDA 12.8+ для SageAttention2 |
+| **RTX 4090** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu126` | Оптимальная производительность |
+| **RTX 4080** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu126` | Отличная совместимость |
+| **RTX 4070** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu124` | Стабильная работа |
+| **RTX 3090** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu124` | Совместимость с Ampere |
+| **RTX 3080** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu124` | Совместимость с Ampere |
 
 > ⚠️ **Важно**: RTX 5090/5080 требуют CUDA 12.8+ для корректной работы SageAttention2. При использовании CUDA 12.4/12.6 SageAttention2 не установится.
 
