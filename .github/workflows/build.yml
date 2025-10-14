@@ -32,6 +32,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Print context & check secrets length
+        run: |
+          echo "ref=$GITHUB_REF sha=$GITHUB_SHA repo=$GITHUB_REPOSITORY"
+          ulen=${#DOCKERHUB_USERNAME}
+          tlen=${#DOCKERHUB_TOKEN}
+          echo "DOCKERHUB_USERNAME length: $ulen"
+          echo "DOCKERHUB_TOKEN length: $tlen"
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Validate Docker Hub secrets
         run: |
           if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then echo "Missing secret: DOCKERHUB_USERNAME" && exit 1; fi
