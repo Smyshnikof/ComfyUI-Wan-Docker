@@ -397,8 +397,23 @@ INDEX_HTML = """
     function pollHFStatus(taskId) {
       const progress = document.getElementById('hf-progress');
       const result = document.getElementById('hf-result');
-      const btn = document.querySelector('form[action="/download_hf"] button[type="submit"]') || 
-                  document.querySelector('form[action="/download_url"] button[type="submit"]');
+      
+      // Находим активную кнопку (видимую форму)
+      const hfForm = document.getElementById('hf-repo-form');
+      const urlForm = document.getElementById('hf-url-form');
+      let btn = null;
+      
+      if (hfForm.style.display !== 'none') {
+        btn = hfForm.querySelector('button[type="submit"]');
+      } else if (urlForm.style.display !== 'none') {
+        btn = urlForm.querySelector('button[type="submit"]');
+      }
+      
+      if (!btn) {
+        // Fallback - ищем любую кнопку
+        btn = document.querySelector('form[action="/download_hf"] button[type="submit"]') || 
+              document.querySelector('form[action="/download_url"] button[type="submit"]');
+      }
       
       fetch(`/status/${taskId}`)
       .then(response => response.json())
@@ -406,8 +421,10 @@ INDEX_HTML = """
         if (data.status === 'completed' || data.status === 'error') {
           result.textContent = data.message;
           progress.style.display = 'none';
-          btn.disabled = false;
-          btn.textContent = btn.textContent.includes('HuggingFace') ? '🤗 Скачать с HuggingFace' : '🔗 Скачать по ссылке';
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = btn.textContent.includes('HuggingFace') ? '🤗 Скачать с HuggingFace' : '🔗 Скачать по ссылке';
+          }
         } else if (data.status === 'running') {
           result.textContent = data.message + ' (проверяем статус...)';
           // Повторяем через 2 секунды
@@ -415,15 +432,19 @@ INDEX_HTML = """
         } else {
           result.textContent = '❌ Неизвестный статус: ' + data.message;
           progress.style.display = 'none';
-          btn.disabled = false;
-          btn.textContent = btn.textContent.includes('HuggingFace') ? '🤗 Скачать с HuggingFace' : '🔗 Скачать по ссылке';
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = btn.textContent.includes('HuggingFace') ? '🤗 Скачать с HuggingFace' : '🔗 Скачать по ссылке';
+          }
         }
       })
       .catch(error => {
         result.textContent = '❌ Ошибка проверки статуса: ' + error.message;
         progress.style.display = 'none';
-        btn.disabled = false;
-        btn.textContent = btn.textContent.includes('HuggingFace') ? '🤗 Скачать с HuggingFace' : '🔗 Скачать по ссылке';
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = btn.textContent.includes('HuggingFace') ? '🤗 Скачать с HuggingFace' : '🔗 Скачать по ссылке';
+        }
       });
     }
     
