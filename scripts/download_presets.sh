@@ -94,11 +94,6 @@ for preset in "${PRESETS[@]}"; do
             download_if_missing "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" "/workspace/ComfyUI/models/vae"
             download_if_missing "https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_HIGH_fp16.safetensors" "/workspace/ComfyUI/models/loras"
             download_if_missing "https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors" "/workspace/ComfyUI/models/loras"
-            
-            # Download FLF preset files
-            echo "Downloading FLF preset files..."
-            mkdir -p "/workspace/ComfyUI/user/default/workflows"
-            download_if_missing "https://raw.githubusercontent.com/Smyshnikof/ComfyUI-Wan-Docker/main/presets/wan/FLF/WAN%202.2%20FLF2V%20Florence2.json" "/workspace/ComfyUI/user/default/workflows"
             ;;
         *)
             echo "No matching WAN preset for '${preset}', skipping."
