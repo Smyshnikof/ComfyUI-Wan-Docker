@@ -134,6 +134,15 @@ INDEX_HTML = """
           {{ presets_html }}
         </div>
         <div class="row-full">
+          <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer;">
+            <input type="checkbox" id="lightning-lora-checkbox" style="width: 16px; height: 16px;">
+            <span id="lightning-lora-text">⚡ Дополнительно докачать экспериментальные Lightning LoRA</span>
+          </label>
+          <div id="lightning-lora-details" style="margin-left: 24px; font-size: 12px; color: var(--muted); display: none;">
+            <div id="lightning-lora-list"></div>
+          </div>
+        </div>
+        <div class="row-full">
           <button class="btn btn-preset" onclick="downloadPresets()" id="download-presets-btn" disabled>
             📥 Скачать выбранные пресеты
           </button>
@@ -318,6 +327,73 @@ INDEX_HTML = """
       btn.textContent = selectedPresets.length > 0 ? 
         `📥 Скачать выбранные пресеты (${selectedPresets.length})` : 
         '📥 Скачать выбранные пресеты';
+      
+      // Обновляем информацию о Lightning LoRA
+      updateLightningLoraInfo();
+    }
+    
+    function updateLightningLoraInfo() {
+      const lightningText = document.getElementById('lightning-lora-text');
+      const lightningDetails = document.getElementById('lightning-lora-details');
+      const lightningList = document.getElementById('lightning-lora-list');
+      
+      if (selectedPresets.length === 0) {
+        lightningText.textContent = '⚡ Дополнительно докачать экспериментальные Lightning LoRA';
+        lightningDetails.style.display = 'none';
+        // Отключаем чекбокс и делаем его полупрозрачным
+        document.getElementById('lightning-lora-checkbox').disabled = true;
+        document.getElementById('lightning-lora-checkbox').parentElement.style.opacity = '0.5';
+        return;
+      }
+      
+      const lightningModels = {
+        'WAN_T2V': [
+          'T2V-Lightning-250928-high_noise_model.safetensors',
+          'T2V-Lightning-250928-low_noise_model.safetensors'
+        ],
+        'WAN_I2V': [
+          'I2V-Lightning-Seko-V1-high_noise_model.safetensors',
+          'I2V-Lightning-Seko-V1-low_noise_model.safetensors'
+        ],
+        'WAN_FLF': [
+          'FLF-Lightning-Seko-V1-high_noise_model.safetensors',
+          'FLF-Lightning-Seko-V1-low_noise_model.safetensors'
+        ]
+      };
+      
+      const selectedLightningModels = [];
+      selectedPresets.forEach(preset => {
+        if (lightningModels[preset]) {
+          selectedLightningModels.push(...lightningModels[preset]);
+        }
+      });
+      
+      if (selectedLightningModels.length > 0) {
+        const count = selectedLightningModels.length;
+        const fileWord = count === 1 ? 'файл' : count < 5 ? 'файла' : 'файлов';
+        lightningText.textContent = `⚡ Дополнительно докачать экспериментальные Lightning LoRA (${count} ${fileWord})`;
+        
+        // Показываем чекбокс и делаем его активным
+        document.getElementById('lightning-lora-checkbox').disabled = false;
+        document.getElementById('lightning-lora-checkbox').parentElement.style.opacity = '1';
+        
+        // Показываем список файлов только если галочка поставлена
+        const checkbox = document.getElementById('lightning-lora-checkbox');
+        if (checkbox.checked) {
+          lightningDetails.style.display = 'block';
+          lightningList.innerHTML = selectedLightningModels.map(model => 
+            `• ${model}`
+          ).join('<br>');
+        } else {
+          lightningDetails.style.display = 'none';
+        }
+      } else {
+        lightningText.textContent = '⚡ Экспериментальные Lightning LoRA недоступны для выбранных пресетов';
+        lightningDetails.style.display = 'none';
+        // Отключаем чекбокс и делаем его полупрозрачным
+        document.getElementById('lightning-lora-checkbox').disabled = true;
+        document.getElementById('lightning-lora-checkbox').parentElement.style.opacity = '0.5';
+      }
     }
     
     function downloadPresets() {
@@ -326,6 +402,7 @@ INDEX_HTML = """
       const progress = document.getElementById('preset-progress');
       const result = document.getElementById('preset-result');
       const btn = document.getElementById('download-presets-btn');
+      const lightningCheckbox = document.getElementById('lightning-lora-checkbox');
       
       // Показываем прогресс
       progress.style.display = 'block';
@@ -336,6 +413,7 @@ INDEX_HTML = """
       // Отправляем запрос
       const formData = new FormData();
       formData.append('presets', selectedPresets.join(','));
+      formData.append('lightning_lora', lightningCheckbox.checked ? 'true' : 'false');
       
       fetch('/download_presets', {
         method: 'POST',
@@ -344,7 +422,8 @@ INDEX_HTML = """
       .then(response => response.json())
       .then(data => {
         if (data.task_id) {
-          result.textContent = data.message;
+          const lightningStatus = lightningCheckbox.checked ? ' (включая Lightning LoRA)' : '';
+          result.textContent = data.message + lightningStatus;
           // Начинаем опрос статуса
           pollStatus(data.task_id);
         } else {
@@ -371,7 +450,12 @@ INDEX_HTML = """
       .then(response => response.json())
       .then(data => {
         if (data.status === 'completed' || data.status === 'error') {
-          result.textContent = data.message;
+          let message = data.message;
+          const lightningCheckbox = document.getElementById('lightning-lora-checkbox');
+          if (lightningCheckbox && lightningCheckbox.checked && data.status === 'completed') {
+            message += '\n⚡ Lightning LoRA также скачаны (экспериментальные версии)';
+          }
+          result.textContent = message;
           progress.style.display = 'none';
           btn.disabled = false;
           btn.textContent = '📥 Скачать выбранные пресеты';
@@ -531,6 +615,18 @@ INDEX_HTML = """
         btn.textContent = '🔗 Скачать по ссылке';
       });
     });
+    
+    // Обработчик для чекбокса Lightning LoRA
+    document.getElementById('lightning-lora-checkbox').addEventListener('change', function() {
+      // Обновляем информацию о Lightning LoRA при изменении чекбокса
+      updateLightningLoraInfo();
+    });
+    
+    // Инициализация
+    document.addEventListener('DOMContentLoaded', function() {
+      // Инициализируем состояние Lightning LoRA при загрузке страницы
+      updateLightningLoraInfo();
+    });
   </script>
 </body>
 </html>
@@ -569,7 +665,7 @@ def get_status(task_id: str):
     return download_status[task_id]
 
 @app.post("/download_presets")
-def download_presets(presets: str = Form(...)):
+def download_presets(presets: str = Form(...), lightning_lora: str = Form("false")):
     try:
         # Парсим строку пресетов
         presets_list = [p.strip() for p in presets.split(',') if p.strip()]
@@ -586,8 +682,13 @@ def download_presets(presets: str = Form(...)):
         
         def run_download():
             try:
+                # Формируем команду с параметром Lightning LoRA
+                cmd = ["bash", "/download_presets.sh", ",".join(presets_list)]
+                if lightning_lora.lower() == "true":
+                    cmd.append("true")
+                
                 result = subprocess.run(
-                    ["bash", "/download_presets.sh", ",".join(presets_list)],
+                    cmd,
                     capture_output=True,
                     text=True,
                     timeout=1800  # 30 минут

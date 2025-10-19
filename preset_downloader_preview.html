@@ -101,6 +101,20 @@
             <div class="preset-desc">Анимация изображений</div>
             <div class="preset-info">Размер: ~30GB • Время: 10-15 мин</div>
           </div>
+          <div class="preset-card" data-preset="WAN_FLF" onclick="togglePreset('WAN_FLF')">
+            <div class="preset-name">Wan FLF (First Last Frame)</div>
+            <div class="preset-desc">Генерация видео с помощью первого и последнего кадра</div>
+            <div class="preset-info">Размер: ~40GB • Время: 15-20 мин</div>
+          </div>
+        </div>
+        <div class="row-full">
+          <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; cursor: pointer;">
+            <input type="checkbox" id="lightning-lora-checkbox" style="width: 16px; height: 16px;">
+            <span id="lightning-lora-text">⚡ Дополнительно докачать экспериментальные Lightning LoRA</span>
+          </label>
+          <div id="lightning-lora-details" style="margin-left: 24px; font-size: 12px; color: var(--muted); display: none;">
+            <div id="lightning-lora-list"></div>
+          </div>
         </div>
         <div class="row-full">
           <button class="btn btn-preset" onclick="downloadPresets()" id="download-presets-btn" disabled>
@@ -310,7 +324,84 @@
       btn.textContent = selectedPresets.length > 0 ? 
         `📥 Скачать выбранные пресеты (${selectedPresets.length})` : 
         '📥 Скачать выбранные пресеты';
+      
+      // Обновляем информацию о Lightning LoRA
+      updateLightningLoraInfo();
     }
+    
+    function updateLightningLoraInfo() {
+      const lightningText = document.getElementById('lightning-lora-text');
+      const lightningDetails = document.getElementById('lightning-lora-details');
+      const lightningList = document.getElementById('lightning-lora-list');
+      
+      if (selectedPresets.length === 0) {
+        lightningText.textContent = '⚡ Дополнительно докачать экспериментальные Lightning LoRA';
+        lightningDetails.style.display = 'none';
+        // Отключаем чекбокс и делаем его полупрозрачным
+        document.getElementById('lightning-lora-checkbox').disabled = true;
+        document.getElementById('lightning-lora-checkbox').parentElement.style.opacity = '0.5';
+        return;
+      }
+      
+      const lightningModels = {
+        'WAN_T2V': [
+          'T2V-Lightning-250928-high_noise_model.safetensors',
+          'T2V-Lightning-250928-low_noise_model.safetensors'
+        ],
+        'WAN_I2V': [
+          'I2V-Lightning-Seko-V1-high_noise_model.safetensors',
+          'I2V-Lightning-Seko-V1-low_noise_model.safetensors'
+        ],
+        'WAN_FLF': [
+          'FLF-Lightning-Seko-V1-high_noise_model.safetensors',
+          'FLF-Lightning-Seko-V1-low_noise_model.safetensors'
+        ]
+      };
+      
+      const selectedLightningModels = [];
+      selectedPresets.forEach(preset => {
+        if (lightningModels[preset]) {
+          selectedLightningModels.push(...lightningModels[preset]);
+        }
+      });
+      
+      // Отладка: показываем какие пресеты выбраны
+      console.log('Selected presets:', selectedPresets);
+      console.log('Lightning models for selected presets:', selectedLightningModels);
+      
+      if (selectedLightningModels.length > 0) {
+        const count = selectedLightningModels.length;
+        const fileWord = count === 1 ? 'файл' : count < 5 ? 'файла' : 'файлов';
+        lightningText.textContent = `⚡ Дополнительно докачать экспериментальные Lightning LoRA (${count} ${fileWord})`;
+        
+        // Показываем чекбокс и делаем его активным
+        document.getElementById('lightning-lora-checkbox').disabled = false;
+        document.getElementById('lightning-lora-checkbox').parentElement.style.opacity = '1';
+        
+        // Показываем список файлов только если галочка поставлена
+        const checkbox = document.getElementById('lightning-lora-checkbox');
+        if (checkbox.checked) {
+          lightningDetails.style.display = 'block';
+          lightningList.innerHTML = selectedLightningModels.map(model => 
+            `• ${model}`
+          ).join('<br>');
+        } else {
+          lightningDetails.style.display = 'none';
+        }
+      } else {
+        lightningText.textContent = '⚡ Экспериментальные Lightning LoRA недоступны для выбранных пресетов';
+        lightningDetails.style.display = 'none';
+        // Отключаем чекбокс и делаем его полупрозрачным
+        document.getElementById('lightning-lora-checkbox').disabled = true;
+        document.getElementById('lightning-lora-checkbox').parentElement.style.opacity = '0.5';
+      }
+    }
+    
+    // Обработчик для чекбокса Lightning LoRA
+    document.getElementById('lightning-lora-checkbox').addEventListener('change', function() {
+      // Обновляем информацию о Lightning LoRA при изменении чекбокса
+      updateLightningLoraInfo();
+    });
     
     function downloadPresets() {
       if (selectedPresets.length === 0) return;
@@ -318,6 +409,7 @@
       const progress = document.getElementById('preset-progress');
       const result = document.getElementById('preset-result');
       const btn = document.getElementById('download-presets-btn');
+      const lightningCheckbox = document.getElementById('lightning-lora-checkbox');
       
       // Показываем прогресс
       progress.style.display = 'block';
@@ -327,13 +419,19 @@
       
       // Симулируем асинхронную загрузку
       const taskId = 'preview-' + Date.now();
-      result.textContent = `🚀 Скачивание начато! ID задачи: ${taskId}`;
+      const lightningStatus = lightningCheckbox.checked ? ' (включая Lightning LoRA)' : '';
+      result.textContent = `🚀 Скачивание начато! ID задачи: ${taskId}${lightningStatus}`;
       
       // Симулируем опрос статуса
       setTimeout(() => {
-        result.textContent = `🚀 Начато скачивание пресетов: ${selectedPresets.join(', ')} (проверяем статус...)`;
+        result.textContent = `🚀 Начато скачивание пресетов: ${selectedPresets.join(', ')}${lightningStatus} (проверяем статус...)`;
         setTimeout(() => {
-          result.textContent = `✅ Успешно скачаны пресеты: ${selectedPresets.join(', ')}\n\n📁 Файлы сохранены в /workspace/ComfyUI/models/\n🎉 Готово к использованию!`;
+          let message = `✅ Успешно скачаны пресеты: ${selectedPresets.join(', ')}\n\n📁 Файлы сохранены в /workspace/ComfyUI/models/`;
+          if (lightningCheckbox.checked) {
+            message += `\n⚡ Lightning LoRA также скачаны (экспериментальные версии)`;
+          }
+          message += `\n🎉 Готово к использованию!`;
+          result.textContent = message;
           progress.style.display = 'none';
           btn.disabled = false;
           btn.textContent = '📥 Скачать выбранные пресеты';
@@ -432,10 +530,8 @@
     
     // Инициализация
     document.addEventListener('DOMContentLoaded', function() {
-      // Добавляем пример выбранного пресета
-      setTimeout(() => {
-        togglePreset('WAN_T2V');
-      }, 500);
+      // Инициализируем состояние Lightning LoRA при загрузке страницы
+      updateLightningLoraInfo();
     });
   </script>
 </body>

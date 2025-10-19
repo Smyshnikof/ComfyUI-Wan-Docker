@@ -7,13 +7,18 @@ if [[ "$1" == "--quiet" ]]; then
     shift
 fi
 
-# download_if_missing <URL> <TARGET_DIR>
+# download_if_missing <URL> <TARGET_DIR> [CUSTOM_FILENAME]
 download_if_missing() {
     local url="$1"
     local dest_dir="$2"
+    local custom_filename="$3"
 
     local filename
-    filename=$(basename "$url")
+    if [ -n "$custom_filename" ]; then
+        filename="$custom_filename"
+    else
+        filename=$(basename "$url")
+    fi
     local filepath="$dest_dir/$filename"
 
     mkdir -p "$dest_dir"
@@ -40,8 +45,12 @@ download_if_missing() {
 }
 
 IFS=',' read -ra PRESETS <<< "$1"
+LIGHTNING_LORA="${2:-false}"
 
 echo "**** Checking presets and downloading corresponding files ****"
+if [[ "$LIGHTNING_LORA" == "true" ]]; then
+    echo "**** Lightning LoRA enabled - will download experimental fast LoRA models ****"
+fi
 
 for preset in "${PRESETS[@]}"; do
     case "${preset}" in
@@ -53,6 +62,13 @@ for preset in "${PRESETS[@]}"; do
             download_if_missing "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" "/workspace/ComfyUI/models/vae"
             download_if_missing "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_HIGH_fp16.safetensors" "/workspace/ComfyUI/models/loras"
             download_if_missing "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_LOW_fp16.safetensors" "/workspace/ComfyUI/models/loras"
+            
+            # Lightning LoRA (experimental fast versions)
+            if [[ "$LIGHTNING_LORA" == "true" ]]; then
+                echo "Downloading Lightning LoRA for T2V..."
+                download_if_missing "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-250928/high_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "T2V-Lightning-250928-high_noise_model.safetensors"
+                download_if_missing "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-250928/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "T2V-Lightning-250928-low_noise_model.safetensors"
+            fi
             ;;
         WAN_T2I)
             echo "Preset: WAN_T2I (Wan T2I)"
@@ -75,6 +91,13 @@ for preset in "${PRESETS[@]}"; do
             download_if_missing "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" "/workspace/ComfyUI/models/vae"
             download_if_missing "https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_HIGH_fp16.safetensors" "/workspace/ComfyUI/models/loras"
             download_if_missing "https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors" "/workspace/ComfyUI/models/loras"
+            
+            # Lightning LoRA (experimental fast versions)
+            if [[ "$LIGHTNING_LORA" == "true" ]]; then
+                echo "Downloading Lightning LoRA for I2V..."
+                download_if_missing "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "I2V-Lightning-Seko-V1-high_noise_model.safetensors"
+                download_if_missing "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "I2V-Lightning-Seko-V1-low_noise_model.safetensors"
+            fi
             ;;
         WAN_ANIMATE)
             echo "Preset: WAN_ANIMATE (Wan Animate)"
@@ -94,6 +117,13 @@ for preset in "${PRESETS[@]}"; do
             download_if_missing "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" "/workspace/ComfyUI/models/vae"
             download_if_missing "https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_HIGH_fp16.safetensors" "/workspace/ComfyUI/models/loras"
             download_if_missing "https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors" "/workspace/ComfyUI/models/loras"
+            
+            # Lightning LoRA (experimental fast versions) - using I2V version for FLF
+            if [[ "$LIGHTNING_LORA" == "true" ]]; then
+                echo "Downloading Lightning LoRA for FLF (using I2V version)..."
+                download_if_missing "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "FLF-Lightning-Seko-V1-high_noise_model.safetensors"
+                download_if_missing "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "FLF-Lightning-Seko-V1-low_noise_model.safetensors"
+            fi
             ;;
         *)
             echo "No matching WAN preset for '${preset}', skipping."
