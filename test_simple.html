@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Simple Preset Selection</title>
+    <style>
+        body { background: #1e1e1e; color: white; font-family: Arial; padding: 20px; }
+        .preset-card { 
+            background: #1a1a1a; 
+            border: 1px solid #3a3a3a; 
+            border-radius: 8px; 
+            padding: 16px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            margin: 10px;
+            display: inline-block;
+            width: 200px;
+        }
+        .preset-card:hover { 
+            border-color: #ffffff; 
+            background: #222; 
+        }
+        .preset-card.selected { 
+            border-color: #ffffff; 
+            background: rgba(255,255,255,0.1); 
+        }
+        .btn { 
+            padding: 12px 20px; 
+            background: rgba(34, 197, 94, 0.9); 
+            color: white; 
+            border: none;
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin: 10px;
+        }
+        .btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Simple Preset Selection</h1>
+    
+    <div class="preset-card" data-preset="WAN_T2V" onclick="togglePreset('WAN_T2V')">
+        <div>Wan T2V (Text-to-Video)</div>
+    </div>
+    
+    <div class="preset-card" data-preset="WAN_T2I" onclick="togglePreset('WAN_T2I')">
+        <div>Wan T2I (Text-to-Image)</div>
+    </div>
+    
+    <br><br>
+    
+    <button class="btn" onclick="downloadPresets()" id="download-presets-btn" disabled>
+        Скачать выбранные пресеты
+    </button>
+    
+    <div id="result" style="margin-top: 20px;"></div>
+    
+    <script>
+        console.log('JavaScript loaded');
+        let selectedPresets = [];
+        console.log('selectedPresets initialized:', selectedPresets);
+        
+        function togglePreset(presetId) {
+            console.log('togglePreset called with:', presetId);
+            const card = document.querySelector('[data-preset="' + presetId + '"]');
+            console.log('Card found:', card);
+            
+            if (selectedPresets.includes(presetId)) {
+                selectedPresets = selectedPresets.filter(function(p) { return p !== presetId; });
+                card.classList.remove('selected');
+                console.log('Removed preset:', presetId);
+            } else {
+                selectedPresets.push(presetId);
+                card.classList.add('selected');
+                console.log('Added preset:', presetId);
+            }
+            
+            const btn = document.getElementById('download-presets-btn');
+            btn.disabled = selectedPresets.length === 0;
+            btn.textContent = selectedPresets.length > 0 ? 
+                'Скачать выбранные пресеты (' + selectedPresets.length + ')' : 
+                'Скачать выбранные пресеты';
+            
+            console.log('Selected presets:', selectedPresets);
+            document.getElementById('result').textContent = 'Выбрано: ' + selectedPresets.join(', ');
+        }
+        
+        function downloadPresets() {
+            console.log('Download presets:', selectedPresets);
+            document.getElementById('result').textContent = 'Скачивание: ' + selectedPresets.join(', ');
+        }
+        
+        console.log('Functions defined');
+    </script>
+</body>
+</html>
