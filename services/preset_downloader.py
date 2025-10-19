@@ -16,7 +16,9 @@ import tempfile
 app = FastAPI(title="Preset & Model Downloader")
 
 # Подключаем статические файлы
-app.mount("/static", StaticFiles(directory="services/static"), name="static")
+import os
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # Доступные пресеты
 PRESETS = {
