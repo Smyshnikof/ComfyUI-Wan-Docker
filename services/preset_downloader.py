@@ -39,6 +39,12 @@ PRESETS = {
         "description": "Анимация изображений",
         "size": "~30GB",
         "time": "10-15 мин"
+    },
+    "WAN_FLF": {
+        "name": "Wan FLF (First Last Frame)",
+        "description": "Генерация видео с помощью первого и последнего кадра",
+        "size": "~40GB",
+        "time": "15-20 мин"
     }
 }
 
