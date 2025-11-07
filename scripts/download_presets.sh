@@ -26,22 +26,27 @@ download_if_missing() {
     mkdir -p "$dest_dir"
 
     if [ -f "$filepath" ]; then
-        echo "PROGRESS:$current_num:$total_num:File already exists: $filename (skipping)"
-        return
+        echo "PROGRESS:$current_num:$total_num:SKIP:$filename"
+        echo "SUMMARY:SKIP:$filename"
+        return 0
     fi
 
-    echo "PROGRESS:$current_num:$total_num:Downloading: $filename"
+    echo "PROGRESS:$current_num:$total_num:DOWNLOADING:$filename"
     
     local tmpdir="/workspace/tmp"
     mkdir -p "$tmpdir"
     local tmpfile="$tmpdir/${filename}.part"
 
-    # Скачиваем файл
-    if wget $WGET_OPTS -O "$tmpfile" "$url"; then
+    # Скачиваем файл, весь вывод wget перенаправляем в /dev/null
+    # Прогресс показываем только через наши маркеры
+    if wget --progress=bar:force:noscroll -O "$tmpfile" "$url" >/dev/null 2>&1; then
         mv -f "$tmpfile" "$filepath"
-        echo "PROGRESS:$current_num:$total_num:Download completed: $filename"
+        echo "PROGRESS:$current_num:$total_num:COMPLETED:$filename"
+        echo "SUMMARY:DOWNLOADED:$filename"
+        return 0
     else
-        echo "PROGRESS:$current_num:$total_num:Download failed: $filename"
+        echo "PROGRESS:$current_num:$total_num:FAILED:$filename"
+        echo "SUMMARY:FAILED:$filename"
         rm -f "$tmpfile"
         return 1
     fi

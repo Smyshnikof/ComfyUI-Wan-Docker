@@ -523,10 +523,14 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                     universal_newlines=True
                 )
                 
-                output_lines = []
                 total_files = 0
                 current_file = 0
                 current_filename = ""
+                
+                # Списки для итоговой сводки
+                downloaded_files = []
+                skipped_files = []
+                failed_files = []
                 
                 # Инициализируем статус перед началом
                 download_status[task_id] = {
@@ -544,8 +548,6 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                     if not line:
                         continue
                     
-                    output_lines.append(line)
-                    
                     # Парсим строки прогресса
                     if line.startswith("TOTAL_FILES:"):
                         try:
@@ -562,30 +564,35 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                             pass
                     elif line.startswith("PROGRESS:"):
                         try:
-                            # Формат: PROGRESS:current:total:message или PROGRESS:current:total:percent:filename
+                            # Формат: PROGRESS:current:total:status:filename
                             parts = line.split(":", 4)
-                            if len(parts) >= 4:
+                            if len(parts) >= 5:
                                 current_file = int(parts[1])
                                 total = int(parts[2])
-                                if len(parts) == 5 and parts[3].isdigit():
-                                    # Формат с процентом: PROGRESS:current:total:percent:filename
-                                    percent = int(parts[3])
-                                    current_filename = parts[4]
-                                    # Вычисляем общий прогресс: (current-1)/total + percent/(100*total)
-                                    progress = ((current_file - 1) / total * 100) + (percent / total)
+                                status = parts[3]
+                                current_filename = parts[4]
+                                
+                                # Вычисляем прогресс
+                                if status == "COMPLETED" or status == "SKIP":
+                                    progress = (current_file / total * 100)
+                                elif status == "DOWNLOADING":
+                                    progress = ((current_file - 1) / total * 100)
                                 else:
-                                    # Формат без процента: PROGRESS:current:total:message
-                                    message = parts[3]
-                                    current_filename = message.split(":")[-1] if ":" in message else message
-                                    # Если файл уже существует или завершен, считаем его как 100%
-                                    if "already exists" in message or "completed" in message:
-                                        progress = (current_file / total * 100)
-                                    else:
-                                        progress = ((current_file - 1) / total * 100)
+                                    progress = ((current_file - 1) / total * 100)
+                                
+                                # Формируем сообщение
+                                if status == "DOWNLOADING":
+                                    message = f"📥 Скачивание файла {current_file} из {total}: {current_filename}"
+                                elif status == "COMPLETED":
+                                    message = f"✅ Завершено: {current_filename} ({current_file}/{total})"
+                                elif status == "SKIP":
+                                    message = f"⏭️ Пропущено (уже существует): {current_filename} ({current_file}/{total})"
+                                else:
+                                    message = f"📥 Обработка файла {current_file} из {total}: {current_filename}"
                                 
                                 download_status[task_id] = {
                                     "status": "running",
-                                    "message": f"📥 Скачивание файла {current_file} из {total}: {current_filename}",
+                                    "message": message,
                                     "progress": min(progress, 100),
                                     "total_files": total,
                                     "current_file": current_file,
@@ -601,14 +608,58 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                                 "current_file": download_status[task_id].get("current_file", 0),
                                 "current_filename": download_status[task_id].get("current_filename", "")
                             }
+                    elif line.startswith("SUMMARY:"):
+                        # Собираем итоговую информацию
+                        try:
+                            parts = line.split(":", 2)
+                            if len(parts) >= 3:
+                                summary_type = parts[1]
+                                filename = parts[2]
+                                if summary_type == "DOWNLOADED":
+                                    downloaded_files.append(filename)
+                                elif summary_type == "SKIP":
+                                    skipped_files.append(filename)
+                                elif summary_type == "FAILED":
+                                    failed_files.append(filename)
+                        except:
+                            pass
                 
                 # Ждем завершения процесса
                 process.wait()
                 
+                # Формируем итоговую сводку
+                summary_parts = []
+                summary_parts.append(f"✅ Скачивание пресетов завершено: {', '.join(presets_list)}")
+                summary_parts.append("")
+                
+                if downloaded_files:
+                    summary_parts.append(f"📥 Скачано файлов: {len(downloaded_files)}")
+                    for filename in downloaded_files[:10]:  # Показываем первые 10
+                        summary_parts.append(f"   ✅ {filename}")
+                    if len(downloaded_files) > 10:
+                        summary_parts.append(f"   ... и еще {len(downloaded_files) - 10} файлов")
+                    summary_parts.append("")
+                
+                if skipped_files:
+                    summary_parts.append(f"⏭️ Пропущено (уже существуют): {len(skipped_files)}")
+                    for filename in skipped_files[:10]:  # Показываем первые 10
+                        summary_parts.append(f"   ⏭️ {filename}")
+                    if len(skipped_files) > 10:
+                        summary_parts.append(f"   ... и еще {len(skipped_files) - 10} файлов")
+                    summary_parts.append("")
+                
+                if failed_files:
+                    summary_parts.append(f"❌ Ошибки при скачивании: {len(failed_files)}")
+                    for filename in failed_files:
+                        summary_parts.append(f"   ❌ {filename}")
+                    summary_parts.append("")
+                
+                summary_message = "\n".join(summary_parts)
+                
                 if process.returncode == 0:
                     download_status[task_id] = {
                         "status": "completed",
-                        "message": f"✅ Успешно скачаны пресеты: {', '.join(presets_list)}\n\n" + "\n".join(output_lines[-20:]),  # Последние 20 строк
+                        "message": summary_message,
                         "progress": 100,
                         "total_files": total_files,
                         "current_file": total_files,
@@ -617,7 +668,7 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                 else:
                     download_status[task_id] = {
                         "status": "error", 
-                        "message": f"❌ Ошибка скачивания пресетов:\n" + "\n".join(output_lines[-20:]),
+                        "message": summary_message + (f"\n\n❌ Процесс завершился с ошибкой (код: {process.returncode})" if failed_files else ""),
                         "progress": download_status[task_id].get("progress", 0),
                         "total_files": total_files,
                         "current_file": current_file,
