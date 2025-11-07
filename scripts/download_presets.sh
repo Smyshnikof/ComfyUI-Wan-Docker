@@ -65,9 +65,9 @@ download_with_progress() {
     download_if_missing "$1" "$2" "$3" "$CURRENT_FILE" "$TOTAL_FILES"
 }
 
-echo "**** Checking presets and downloading corresponding files ****"
+echo "**** Проверка пресетов и скачивание соответствующих файлов ****"
 if [[ "$LIGHTNING_LORA" == "true" ]]; then
-    echo "**** Lightning LoRA enabled - will download experimental fast LoRA models ****"
+    echo "**** Lightning LoRA включен - будут скачаны экспериментальные быстрые LoRA модели ****"
 fi
 
 # Подсчитываем общее количество файлов
@@ -128,7 +128,7 @@ for preset in "${PRESETS[@]}"; do
             
             # Lightning LoRA (experimental fast versions)
             if [[ "$LIGHTNING_LORA" == "true" ]]; then
-                echo "Downloading Lightning LoRA for T2V..."
+                echo "Скачивание Lightning LoRA для T2V..."
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-250928/high_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "T2V-Lightning-250928-high_noise_model.safetensors"
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-250928/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "T2V-Lightning-250928-low_noise_model.safetensors"
             fi
@@ -157,7 +157,7 @@ for preset in "${PRESETS[@]}"; do
             
             # Lightning LoRA (experimental fast versions)
             if [[ "$LIGHTNING_LORA" == "true" ]]; then
-                echo "Downloading Lightning LoRA for I2V..."
+                echo "Скачивание Lightning LoRA для I2V..."
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "I2V-Lightning-Seko-V1-high_noise_model.safetensors"
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "I2V-Lightning-Seko-V1-low_noise_model.safetensors"
             fi
@@ -173,7 +173,7 @@ for preset in "${PRESETS[@]}"; do
             
             # Lightning LoRA (experimental fast versions)
             if [[ "$LIGHTNING_LORA" == "true" ]]; then
-                echo "Downloading Lightning LoRA for I2V Loop..."
+                echo "Скачивание Lightning LoRA для I2V Loop..."
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "I2V-Lightning-Seko-V1-high_noise_model.safetensors"
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "I2V-Lightning-Seko-V1-low_noise_model.safetensors"
             fi
@@ -199,7 +199,7 @@ for preset in "${PRESETS[@]}"; do
             
             # Lightning LoRA (experimental fast versions) - using I2V version for FLF
             if [[ "$LIGHTNING_LORA" == "true" ]]; then
-                echo "Downloading Lightning LoRA for FLF (using I2V version)..."
+                echo "Скачивание Lightning LoRA для FLF (используется версия I2V)..."
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "FLF-Lightning-Seko-V1-high_noise_model.safetensors"
                 download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras" "FLF-Lightning-Seko-V1-low_noise_model.safetensors"
             fi
@@ -227,7 +227,7 @@ for preset in "${PRESETS[@]}"; do
             download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/BSRGAN.pth" "/workspace/ComfyUI/models/upscale_models"
             ;;
         *)
-            echo "No matching WAN preset for '${preset}', skipping."
+            echo "Не найден пресет WAN для '${preset}', пропускаем."
             ;;
     esac
 done
