@@ -19,6 +19,95 @@ app = FastAPI(title="Preset & Model Downloader")
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
+# Структура файлов для каждого пресета
+PRESET_FILES = {
+    "WAN_T2V": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/T2V/Wan2_2-T2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/T2V/Wan2_2-T2V-A14B_HIGH_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_HIGH_fp16.safetensors", "loras", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_LOW_fp16.safetensors", "loras", None),
+    ],
+    "WAN_T2V_LIGHTNING": [
+        ("https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-250928/high_noise_model.safetensors", "loras", "T2V-Lightning-250928-high_noise_model.safetensors"),
+        ("https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-250928/low_noise_model.safetensors", "loras", "T2V-Lightning-250928-low_noise_model.safetensors"),
+    ],
+    "WAN_T2I": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/T2V/Wan2_2-T2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_HIGH_fp16.safetensors", "loras", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_LOW_fp16.safetensors", "loras", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x-UltraSharp.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_NMKD-Siax_200k.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_RealisticRescaler_100000_G.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_fatal_Anime_500000_G.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/BSRGAN.pth", "upscale_models", None),
+    ],
+    "WAN_I2V": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/I2V/Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/I2V/Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+        ("https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_HIGH_fp16.safetensors", "loras", None),
+        ("https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors", "loras", None),
+    ],
+    "WAN_I2V_LIGHTNING": [
+        ("https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors", "loras", "I2V-Lightning-Seko-V1-high_noise_model.safetensors"),
+        ("https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors", "loras", "I2V-Lightning-Seko-V1-low_noise_model.safetensors"),
+    ],
+    "WAN_I2V_LOOP": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/I2V/Wan2_2-I2V-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/I2V/Wan2_2-I2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+        ("https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_HIGH_fp16.safetensors", "loras", None),
+        ("https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors", "loras", None),
+    ],
+    "WAN_ANIMATE": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/Wan22Animate/Wan2_2-Animate-14B_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors", "vae", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_fp32.safetensors", "vae", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+        ("https://huggingface.co/OreX/Models/resolve/main/WAN/clip_vision_h.safetensors", "clip_vision", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22_relight/WanAnimate_relight_lora_fp16.safetensors", "loras", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors", "loras", None),
+    ],
+    "WAN_FLF": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/Fun/Wan2_2-Fun-InP-A14B-HIGH_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/Fun/Wan2_2-Fun-InP-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+        ("https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_HIGH_fp16.safetensors", "loras", None),
+        ("https://huggingface.co/jrewingwannabe/Wan2.2-Lightning_I2V-A14B-4steps-lora/resolve/main/Wan2.2-Lightning_I2V-A14B-4steps-lora_LOW_fp16.safetensors", "loras", None),
+    ],
+    "WAN_FLF_LIGHTNING": [
+        ("https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/high_noise_model.safetensors", "loras", "FLF-Lightning-Seko-V1-high_noise_model.safetensors"),
+        ("https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-I2V-A14B-4steps-lora-rank64-Seko-V1/low_noise_model.safetensors", "loras", "FLF-Lightning-Seko-V1-low_noise_model.safetensors"),
+    ],
+    "WAN_LIGHTX2V": [
+        ("https://huggingface.co/lightx2v/Wan2.2-Distill-Models/resolve/main/wan2.2_i2v_A14b_high_noise_lightx2v_4step.safetensors", "diffusion_models", "wan2.2_i2v_A14b_high_noise_lightx2v_4step.safetensors"),
+        ("https://huggingface.co/lightx2v/Wan2.2-Distill-Models/resolve/main/wan2.2_i2v_A14b_low_noise_lightx2v_4step.safetensors", "diffusion_models", "wan2.2_i2v_A14b_low_noise_lightx2v_4step.safetensors"),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp16.safetensors", "text_encoders", "umt5_xxl_fp16.safetensors"),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", "wan_2.1_vae.safetensors"),
+        ("https://huggingface.co/rahul7star/wan2.2Lora/resolve/main/Wan2.2-Fun-A14B-InP-high-noise-MPS.safetensors", "loras", "Wan2.2-Fun-A14B-InP-high-noise-MPS.safetensors"),
+        ("https://huggingface.co/rahul7star/wan2.2Lora/resolve/main/Wan2.2-Fun-A14B-InP-low-noise-HPS2.1.safetensors", "loras", "Wan2.2-Fun-A14B-InP-low-noise-HPS2.1.safetensors"),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank256_bf16.safetensors", "loras", "lightx2v_I2V_14B_480p_cfg_step_distill_rank256_bf16.safetensors"),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors", "clip_vision", "clip_vision_h.safetensors"),
+    ],
+    "WAN_I2I_REFINER": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/T2V/Wan2_2-T2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x-UltraSharp.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_NMKD-Siax_200k.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_RealisticRescaler_100000_G.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_fatal_Anime_500000_G.pth", "upscale_models", None),
+        ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/BSRGAN.pth", "upscale_models", None),
+    ],
+}
+
 # Доступные пресеты
 PRESETS = {
     "WAN_T2V": {
@@ -306,6 +395,8 @@ INDEX_HTML = """
     
     function pollHFStatus(taskId) {
       const progress = document.getElementById('hf-progress');
+      const progressFill = document.getElementById('hf-progress-fill');
+      const progressText = document.getElementById('hf-progress-text');
       const result = document.getElementById('hf-result');
       
       // Находим активную кнопку (видимую форму)
@@ -336,9 +427,14 @@ INDEX_HTML = """
             btn.textContent = btn.textContent.includes('HuggingFace') ? '🤗 Скачать с HuggingFace' : '🔗 Скачать по ссылке';
           }
         } else if (data.status === 'running') {
-          result.textContent = data.message + ' (проверяем статус...)';
-          // Повторяем через 2 секунды
-          setTimeout(() => pollHFStatus(taskId), 2000);
+          // Обновляем прогресс-бар
+          const progressPercent = data.progress || 0;
+          progressFill.style.width = progressPercent + '%';
+          progressText.textContent = data.message || 'Загрузка...';
+          result.textContent = data.message || 'Загрузка...';
+          
+          // Повторяем через 500ms для более плавного обновления
+          setTimeout(() => pollHFStatus(taskId), 500);
         } else {
           result.textContent = '❌ Неизвестный статус: ' + data.message;
           progress.style.display = 'none';
@@ -506,126 +602,168 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
         # Создаем уникальный ID для отслеживания
         task_id = str(uuid.uuid4())
         
+        def download_file_with_progress(url, dest_dir, custom_filename, current_file, total_files, task_id):
+            """Скачивает файл с отслеживанием прогресса в реальном времени, как в LoRA загрузчике"""
+            import re
+            
+            # Определяем имя файла
+            if custom_filename:
+                filename = custom_filename
+            else:
+                filename = os.path.basename(url)
+                # Убираем параметры запроса
+                if '?' in filename:
+                    filename = filename.split('?')[0]
+            
+            filepath = os.path.join(dest_dir, filename)
+            os.makedirs(dest_dir, exist_ok=True)
+            
+            # Проверяем, существует ли файл
+            if os.path.isfile(filepath) and os.path.getsize(filepath) > 0:
+                download_status[task_id] = {
+                    "status": "running",
+                    "message": f"⏭️ Пропущено (уже существует): {filename} ({current_file}/{total_files})",
+                    "progress": (current_file / total_files * 100),
+                    "total_files": total_files,
+                    "current_file": current_file,
+                    "current_filename": filename
+                }
+                return "SKIP", filename
+            
+            # Обновляем статус - начало скачивания
+            download_status[task_id] = {
+                "status": "running",
+                "message": f"📥 Скачивание файла {current_file} из {total_files}: {filename} (0%)",
+                "progress": ((current_file - 1) / total_files * 100),
+                "total_files": total_files,
+                "current_file": current_file,
+                "current_filename": filename
+            }
+            
+            try:
+                # Скачиваем файл с отслеживанием прогресса
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+                response = requests.get(url, stream=True, headers=headers, timeout=300)
+                response.raise_for_status()
+                
+                # Получаем размер файла
+                total_size = int(response.headers.get('content-length', 0))
+                downloaded = 0
+                last_update = 0
+                update_interval = 1024 * 1024 * 5  # Обновляем каждые 5MB
+                
+                # Скачиваем по частям и обновляем прогресс
+                with open(filepath, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=1024*1024):  # 1MB chunks
+                        if chunk:
+                            f.write(chunk)
+                            downloaded += len(chunk)
+                            
+                            # Обновляем прогресс каждые 5MB или если это последний chunk
+                            if downloaded - last_update >= update_interval or (total_size > 0 and downloaded >= total_size):
+                                last_update = downloaded
+                                
+                                # Обновляем прогресс
+                                if total_size > 0:
+                                    file_percent = int((downloaded / total_size) * 100)
+                                    # Вычисляем общий прогресс: (current-1)/total + file_percent/(100*total)
+                                    overall_progress = ((current_file - 1) / total_files * 100) + (file_percent / total_files)
+                                    
+                                    download_status[task_id] = {
+                                        "status": "running",
+                                        "message": f"📥 Скачивание файла {current_file} из {total_files}: {filename} ({file_percent}%)",
+                                        "progress": min(overall_progress, 100),
+                                        "total_files": total_files,
+                                        "current_file": current_file,
+                                        "current_filename": filename
+                                    }
+                                else:
+                                    # Если размер неизвестен, показываем только что идет скачивание
+                                    size_mb = downloaded / (1024 * 1024)
+                                    download_status[task_id] = {
+                                        "status": "running",
+                                        "message": f"📥 Скачивание файла {current_file} из {total_files}: {filename} ({size_mb:.1f} MB)",
+                                        "progress": ((current_file - 1) / total_files * 100) + 0.1,  # Минимальный прогресс
+                                        "total_files": total_files,
+                                        "current_file": current_file,
+                                        "current_filename": filename
+                                    }
+                
+                # Финальное обновление - файл скачан
+                download_status[task_id] = {
+                    "status": "running",
+                    "message": f"✅ Завершено: {filename} ({current_file}/{total_files})",
+                    "progress": (current_file / total_files * 100),
+                    "total_files": total_files,
+                    "current_file": current_file,
+                    "current_filename": filename
+                }
+                
+                return "DOWNLOADED", filename
+                
+            except Exception as e:
+                # Удаляем частично скачанный файл
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+                
+                download_status[task_id] = {
+                    "status": "running",
+                    "message": f"❌ Ошибка скачивания: {filename} ({current_file}/{total_files}) - {str(e)[:100]}",
+                    "progress": ((current_file - 1) / total_files * 100),
+                    "total_files": total_files,
+                    "current_file": current_file,
+                    "current_filename": filename
+                }
+                return "FAILED", filename
+        
         def run_download():
             try:
-                # Формируем команду с параметром Lightning LoRA
-                cmd = ["bash", "/download_presets.sh", ",".join(presets_list)]
-                if lightning_lora.lower() == "true":
-                    cmd.append("true")
+                # Собираем все файлы для скачивания
+                all_files = []
+                for preset_id in presets_list:
+                    if preset_id in PRESET_FILES:
+                        all_files.extend(PRESET_FILES[preset_id])
+                    # Добавляем Lightning LoRA если нужно
+                    if lightning_lora.lower() == "true":
+                        if preset_id == "WAN_T2V" and "WAN_T2V_LIGHTNING" in PRESET_FILES:
+                            all_files.extend(PRESET_FILES["WAN_T2V_LIGHTNING"])
+                        elif preset_id in ["WAN_I2V", "WAN_I2V_LOOP"] and "WAN_I2V_LIGHTNING" in PRESET_FILES:
+                            all_files.extend(PRESET_FILES["WAN_I2V_LIGHTNING"])
+                        elif preset_id == "WAN_FLF" and "WAN_FLF_LIGHTNING" in PRESET_FILES:
+                            all_files.extend(PRESET_FILES["WAN_FLF_LIGHTNING"])
                 
-                # Запускаем процесс с построчным чтением вывода
-                process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT,
-                    text=True,
-                    bufsize=0,  # Небуферизованный режим для немедленного чтения
-                    universal_newlines=True
-                )
+                total_files = len(all_files)
                 
-                total_files = 0
-                current_file = 0
-                current_filename = ""
+                # Инициализируем статус
+                download_status[task_id] = {
+                    "status": "running",
+                    "message": f"🚀 Начато скачивание пресетов: {', '.join(presets_list)}\n📦 Всего файлов: {total_files}",
+                    "progress": 0,
+                    "total_files": total_files,
+                    "current_file": 0,
+                    "current_filename": ""
+                }
                 
                 # Списки для итоговой сводки
                 downloaded_files = []
                 skipped_files = []
                 failed_files = []
                 
-                # Инициализируем статус перед началом
-                download_status[task_id] = {
-                    "status": "running",
-                    "message": f"🚀 Начато скачивание пресетов: {', '.join(presets_list)}",
-                    "progress": 0,
-                    "total_files": 0,
-                    "current_file": 0,
-                    "current_filename": ""
-                }
-                
-                # Читаем вывод построчно
-                for line in process.stdout:
-                    line = line.strip()
-                    if not line:
-                        continue
+                # Скачиваем каждый файл
+                for idx, (url, folder, custom_filename) in enumerate(all_files, 1):
+                    dest_dir = f"/workspace/ComfyUI/models/{folder}"
+                    result, filename = download_file_with_progress(
+                        url, dest_dir, custom_filename, idx, total_files, task_id
+                    )
                     
-                    # Парсим строки прогресса
-                    if line.startswith("TOTAL_FILES:"):
-                        try:
-                            total_files = int(line.split(":")[1])
-                            download_status[task_id] = {
-                                "status": "running",
-                                "message": f"🚀 Начато скачивание пресетов: {', '.join(presets_list)}\n📦 Всего файлов: {total_files}",
-                                "progress": 0,
-                                "total_files": total_files,
-                                "current_file": 0,
-                                "current_filename": ""
-                            }
-                        except:
-                            pass
-                    elif line.startswith("PROGRESS:"):
-                        try:
-                            # Формат: PROGRESS:current:total:status:filename
-                            parts = line.split(":", 4)
-                            if len(parts) >= 5:
-                                current_file = int(parts[1])
-                                total = int(parts[2])
-                                status = parts[3]
-                                current_filename = parts[4]
-                                
-                                # Вычисляем прогресс
-                                if status == "COMPLETED" or status == "SKIP":
-                                    progress = (current_file / total * 100)
-                                elif status == "DOWNLOADING":
-                                    progress = ((current_file - 1) / total * 100)
-                                else:
-                                    progress = ((current_file - 1) / total * 100)
-                                
-                                # Формируем сообщение
-                                if status == "DOWNLOADING":
-                                    message = f"📥 Скачивание файла {current_file} из {total}: {current_filename}"
-                                elif status == "COMPLETED":
-                                    message = f"✅ Завершено: {current_filename} ({current_file}/{total})"
-                                elif status == "SKIP":
-                                    message = f"⏭️ Пропущено (уже существует): {current_filename} ({current_file}/{total})"
-                                else:
-                                    message = f"📥 Обработка файла {current_file} из {total}: {current_filename}"
-                                
-                                download_status[task_id] = {
-                                    "status": "running",
-                                    "message": message,
-                                    "progress": min(progress, 100),
-                                    "total_files": total,
-                                    "current_file": current_file,
-                                    "current_filename": current_filename
-                                }
-                        except Exception as e:
-                            # Если не удалось распарсить, просто обновляем сообщение
-                            download_status[task_id] = {
-                                "status": "running",
-                                "message": line,
-                                "progress": download_status[task_id].get("progress", 0),
-                                "total_files": download_status[task_id].get("total_files", 0),
-                                "current_file": download_status[task_id].get("current_file", 0),
-                                "current_filename": download_status[task_id].get("current_filename", "")
-                            }
-                    elif line.startswith("SUMMARY:"):
-                        # Собираем итоговую информацию
-                        try:
-                            parts = line.split(":", 2)
-                            if len(parts) >= 3:
-                                summary_type = parts[1]
-                                filename = parts[2]
-                                if summary_type == "DOWNLOADED":
-                                    downloaded_files.append(filename)
-                                elif summary_type == "SKIP":
-                                    skipped_files.append(filename)
-                                elif summary_type == "FAILED":
-                                    failed_files.append(filename)
-                        except:
-                            pass
-                
-                # Ждем завершения процесса
-                process.wait()
+                    if result == "DOWNLOADED":
+                        downloaded_files.append(filename)
+                    elif result == "SKIP":
+                        skipped_files.append(filename)
+                    elif result == "FAILED":
+                        failed_files.append(filename)
                 
                 # Формируем итоговую сводку
                 summary_parts = []
@@ -656,9 +794,9 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                 
                 summary_message = "\n".join(summary_parts)
                 
-                if process.returncode == 0:
+                if failed_files:
                     download_status[task_id] = {
-                        "status": "completed",
+                        "status": "error",
                         "message": summary_message,
                         "progress": 100,
                         "total_files": total_files,
@@ -667,22 +805,13 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                     }
                 else:
                     download_status[task_id] = {
-                        "status": "error", 
-                        "message": summary_message + (f"\n\n❌ Процесс завершился с ошибкой (код: {process.returncode})" if failed_files else ""),
-                        "progress": download_status[task_id].get("progress", 0),
+                        "status": "completed",
+                        "message": summary_message,
+                        "progress": 100,
                         "total_files": total_files,
-                        "current_file": current_file,
-                        "current_filename": current_filename
+                        "current_file": total_files,
+                        "current_filename": ""
                     }
-            except subprocess.TimeoutExpired:
-                download_status[task_id] = {
-                    "status": "error",
-                    "message": "❌ Таймаут: Скачивание заняло слишком много времени",
-                    "progress": download_status[task_id].get("progress", 0),
-                    "total_files": download_status[task_id].get("total_files", 0),
-                    "current_file": download_status[task_id].get("current_file", 0),
-                    "current_filename": download_status[task_id].get("current_filename", "")
-                }
             except Exception as e:
                 download_status[task_id] = {
                     "status": "error",
@@ -720,23 +849,85 @@ def download_hf(repo: str = Form(...), filename: str = Form(""), token: str = Fo
                 target_dir = f"/workspace/ComfyUI/models/{folder}"
                 os.makedirs(target_dir, exist_ok=True)
                 
-                # Если есть токен, логинимся
-                if token:
-                    login(token=token)
-                
-                # Скачиваем файл
                 if filename:
-                    # Скачиваем конкретный файл
-                    file_path = hf_hub_download(
-                        repo_id=repo,
-                        filename=filename,
-                        cache_dir=target_dir,
-                        local_dir=target_dir,
-                        local_dir_use_symlinks=False
-                    )
-                    file_name = os.path.basename(file_path)
+                    # Скачиваем конкретный файл с прогрессом
+                    # Формируем прямую ссылку на файл
+                    hf_url = f"https://huggingface.co/{repo}/resolve/main/{filename}"
+                    
+                    # Обновляем статус - начало скачивания
+                    download_status[task_id] = {
+                        "status": "running",
+                        "message": f"📥 Подключение к HuggingFace...",
+                        "progress": 0
+                    }
+                    
+                    # Подготавливаем заголовки
+                    headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    }
+                    if token:
+                        headers['Authorization'] = f'Bearer {token}'
+                    
+                    response = requests.get(hf_url, stream=True, headers=headers, timeout=300)
+                    response.raise_for_status()
+                    
+                    file_path = os.path.join(target_dir, filename)
+                    
+                    # Получаем размер файла
+                    total_size = int(response.headers.get('content-length', 0))
+                    downloaded = 0
+                    last_update = 0
+                    update_interval = 1024 * 1024 * 5  # Обновляем каждые 5MB
+                    
+                    # Скачиваем файл с отслеживанием прогресса
+                    with open(file_path, 'wb') as f:
+                        for chunk in response.iter_content(chunk_size=1024*1024):  # 1MB chunks
+                            if chunk:
+                                f.write(chunk)
+                                downloaded += len(chunk)
+                                
+                                # Обновляем прогресс каждые 5MB
+                                if downloaded - last_update >= update_interval or (total_size > 0 and downloaded >= total_size):
+                                    last_update = downloaded
+                                    
+                                    if total_size > 0:
+                                        percent = int((downloaded / total_size) * 100)
+                                        size_mb = downloaded / (1024 * 1024)
+                                        total_mb = total_size / (1024 * 1024)
+                                        download_status[task_id] = {
+                                            "status": "running",
+                                            "message": f"📥 Скачивание: {filename} ({percent}%) - {size_mb:.1f} MB / {total_mb:.1f} MB",
+                                            "progress": percent
+                                        }
+                                    else:
+                                        size_mb = downloaded / (1024 * 1024)
+                                        download_status[task_id] = {
+                                            "status": "running",
+                                            "message": f"📥 Скачивание: {filename} ({size_mb:.1f} MB)",
+                                            "progress": 0
+                                        }
+                    
+                    # Финальное обновление
+                    size_mb = os.path.getsize(file_path) / (1024 * 1024)
+                    success_msg = f"✅ Успешно загружено!\n📁 Файл: {filename}\n💾 Размер: {size_mb:.1f} MB\n📂 Путь: {target_dir}"
+                    
+                    download_status[task_id] = {
+                        "status": "completed",
+                        "message": success_msg,
+                        "progress": 100
+                    }
                 else:
-                    # Скачиваем весь репозиторий
+                    # Скачиваем весь репозиторий (используем huggingface_hub, так как это сложнее)
+                    download_status[task_id] = {
+                        "status": "running",
+                        "message": f"📥 Скачивание всего репозитория {repo}...",
+                        "progress": 0
+                    }
+                    
+                    # Если есть токен, логинимся
+                    if token:
+                        login(token=token)
+                    
                     from huggingface_hub import snapshot_download
                     snapshot_download(
                         repo_id=repo,
@@ -744,30 +935,26 @@ def download_hf(repo: str = Form(...), filename: str = Form(""), token: str = Fo
                         local_dir=target_dir,
                         local_dir_use_symlinks=False
                     )
-                    file_name = f"весь репозиторий {repo}"
-                
-                # Получаем размер файла
-                if os.path.isfile(file_path):
-                    size_mb = os.path.getsize(file_path) / (1024 * 1024)
-                    success_msg = f"✅ Успешно загружено!\n📁 Файл: {file_name}\n💾 Размер: {size_mb:.1f} MB\n📂 Путь: {target_dir}"
-                else:
-                    success_msg = f"✅ Успешно загружено!\n📁 Репозиторий: {file_name}\n📂 Путь: {target_dir}"
-                
-                download_status[task_id] = {
-                    "status": "completed",
-                    "message": success_msg
-                }
+                    
+                    success_msg = f"✅ Успешно загружено!\n📁 Репозиторий: {repo}\n📂 Путь: {target_dir}"
+                    
+                    download_status[task_id] = {
+                        "status": "completed",
+                        "message": success_msg,
+                        "progress": 100
+                    }
                 
             except Exception as e:
                 error_msg = f"❌ Ошибка: {str(e)}"
                 
                 # Если ошибка связана с токеном, предлагаем его ввести
-                if "authentication" in str(e).lower() or "token" in str(e).lower():
+                if "authentication" in str(e).lower() or "token" in str(e).lower() or "401" in str(e):
                     error_msg += "\n\n💡 Попробуйте ввести API токен HuggingFace"
                 
                 download_status[task_id] = {
                     "status": "error",
-                    "message": error_msg
+                    "message": error_msg,
+                    "progress": download_status[task_id].get("progress", 0)
                 }
         
         # Запускаем в отдельном потоке
@@ -778,7 +965,8 @@ def download_hf(repo: str = Form(...), filename: str = Form(""), token: str = Fo
         # Сохраняем статус
         download_status[task_id] = {
             "status": "running",
-            "message": f"🚀 Начато скачивание с HuggingFace: {repo}"
+            "message": f"🚀 Начато скачивание с HuggingFace: {repo}",
+            "progress": 0
         }
         
         return {"message": f"🚀 Скачивание начато! ID задачи: {task_id}", "task_id": task_id}
@@ -797,12 +985,19 @@ def download_url(url: str = Form(...), folder: str = Form("diffusion_models")):
                 target_dir = f"/workspace/ComfyUI/models/{folder}"
                 os.makedirs(target_dir, exist_ok=True)
                 
-                # Скачиваем файл по прямой ссылке
-                import requests
+                # Скачиваем файл по прямой ссылке с отслеживанием прогресса
                 headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
                 }
-                response = requests.get(url, stream=True, headers=headers)
+                
+                # Обновляем статус - начало скачивания
+                download_status[task_id] = {
+                    "status": "running",
+                    "message": f"📥 Подключение к серверу...",
+                    "progress": 0
+                }
+                
+                response = requests.get(url, stream=True, headers=headers, timeout=300)
                 response.raise_for_status()
                 
                 # Получаем имя файла из URL
@@ -832,25 +1027,56 @@ def download_url(url: str = Form(...), folder: str = Form("diffusion_models")):
                 
                 file_path = os.path.join(target_dir, filename)
                 
-                # Скачиваем файл
-                with open(file_path, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        f.write(chunk)
-                
                 # Получаем размер файла
+                total_size = int(response.headers.get('content-length', 0))
+                downloaded = 0
+                last_update = 0
+                update_interval = 1024 * 1024 * 5  # Обновляем каждые 5MB
+                
+                # Скачиваем файл с отслеживанием прогресса
+                with open(file_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=1024*1024):  # 1MB chunks
+                        if chunk:
+                            f.write(chunk)
+                            downloaded += len(chunk)
+                            
+                            # Обновляем прогресс каждые 5MB
+                            if downloaded - last_update >= update_interval or (total_size > 0 and downloaded >= total_size):
+                                last_update = downloaded
+                                
+                                if total_size > 0:
+                                    percent = int((downloaded / total_size) * 100)
+                                    size_mb = downloaded / (1024 * 1024)
+                                    total_mb = total_size / (1024 * 1024)
+                                    download_status[task_id] = {
+                                        "status": "running",
+                                        "message": f"📥 Скачивание: {filename} ({percent}%) - {size_mb:.1f} MB / {total_mb:.1f} MB",
+                                        "progress": percent
+                                    }
+                                else:
+                                    size_mb = downloaded / (1024 * 1024)
+                                    download_status[task_id] = {
+                                        "status": "running",
+                                        "message": f"📥 Скачивание: {filename} ({size_mb:.1f} MB)",
+                                        "progress": 0
+                                    }
+                
+                # Финальное обновление
                 size_mb = os.path.getsize(file_path) / (1024 * 1024)
                 success_msg = f"✅ Успешно загружено!\n🔗 Ссылка: {url}\n📄 Файл: {filename}\n💾 Размер: {size_mb:.1f} MB\n📂 Путь: {target_dir}"
                 
                 download_status[task_id] = {
                     "status": "completed",
-                    "message": success_msg
+                    "message": success_msg,
+                    "progress": 100
                 }
                 
             except Exception as e:
                 error_msg = f"❌ Ошибка: {str(e)}"
                 download_status[task_id] = {
                     "status": "error",
-                    "message": error_msg
+                    "message": error_msg,
+                    "progress": download_status[task_id].get("progress", 0)
                 }
         
         # Запускаем в отдельном потоке
@@ -861,7 +1087,8 @@ def download_url(url: str = Form(...), folder: str = Form("diffusion_models")):
         # Сохраняем статус
         download_status[task_id] = {
             "status": "running",
-            "message": f"🚀 Начато скачивание по ссылке: {url}"
+            "message": f"🚀 Начато скачивание по ссылке: {url}",
+            "progress": 0
         }
         
         return {"message": f"🚀 Скачивание начато! ID задачи: {task_id}", "task_id": task_id}

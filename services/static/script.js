@@ -211,8 +211,8 @@ function pollStatus(taskId) {
       progressText.textContent = progressMessage;
       result.textContent = data.message || 'Загрузка...';
       
-      // Повторяем через 1 секунду для более плавного обновления
-      setTimeout(() => pollStatus(taskId), 1000);
+      // Повторяем через 500ms для более плавного обновления прогресса
+      setTimeout(() => pollStatus(taskId), 500);
     } else {
       result.textContent = '❌ Неизвестный статус: ' + data.message;
       progress.style.display = 'none';

@@ -1,0 +1,135 @@
+warning: in the working copy of 'scripts/download_presets.sh', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/scripts/download_presets.sh b/scripts/download_presets.sh[m
+[1mindex a3db229..2060302 100644[m
+[1m--- a/scripts/download_presets.sh[m
+[1m+++ b/scripts/download_presets.sh[m
+[36m@@ -31,21 +31,62 @@[m [mdownload_if_missing() {[m
+         return 0[m
+     fi[m
+ [m
+[31m-    echo "PROGRESS:$current_num:$total_num:DOWNLOADING:$filename"[m
+[32m+[m[32m    echo "PROGRESS:$current_num:$total_num:DOWNLOADING:1:$filename"[m
+     [m
+     local tmpdir="/workspace/tmp"[m
+     mkdir -p "$tmpdir"[m
+     local tmpfile="$tmpdir/${filename}.part"[m
+[32m+[m[32m    local wget_log="$tmpdir/wget_${current_num}.log"[m
+[32m+[m[32m    local progress_pid_file="$tmpdir/progress_${current_num}.pid"[m
+ [m
+[31m-    # Скачиваем файл, весь вывод wget перенаправляем в /dev/null[m
+[31m-    # Прогресс показываем только через наши маркеры[m
+[31m-    if wget --progress=bar:force:noscroll -O "$tmpfile" "$url" >/dev/null 2>&1; then[m
+[32m+[m[32m    # Запускаем парсер прогресса в фоне[m
+[32m+[m[32m    local last_percent_file="$tmpdir/last_percent_${current_num}.txt"[m
+[32m+[m[32m    ([m
+[32m+[m[32m        local last_reported=0[m
+[32m+[m[32m        while [ -f "$progress_pid_file" ]; do[m
+[32m+[m[32m            if [ -f "$wget_log" ]; then[m
+[32m+[m[32m                # Читаем последнюю строку с процентом из лога[m
+[32m+[m[32m                local last_line=$(tail -1 "$wget_log" 2>/dev/null)[m
+[32m+[m[32m                if [[ "$last_line" =~ ([0-9]+)% ]]; then[m
+[32m+[m[32m                    local percent="${BASH_REMATCH[1]}"[m
+[32m+[m[32m                    # Выводим только если процент изменился (чтобы не дублировать сообщения)[m
+[32m+[m[32m                    if [ "$percent" -ne "$last_reported" ]; then[m
+[32m+[m[32m                        echo "PROGRESS:$current_num:$total_num:DOWNLOADING:$percent:$filename"[m
+[32m+[m[32m                        last_reported="$percent"[m
+[32m+[m[32m                    fi[m
+[32m+[m[32m                fi[m
+[32m+[m[32m            fi[m
+[32m+[m[32m            sleep 0.5[m
+[32m+[m[32m        done[m
+[32m+[m[32m    ) &[m
+[32m+[m[32m    local progress_pid=$![m
+[32m+[m[32m    echo $progress_pid > "$progress_pid_file"[m
+[32m+[m
+[32m+[m[32m    # Скачиваем файл[m
+[32m+[m[32m    wget --progress=bar:force:noscroll -O "$tmpfile" "$url" > "$wget_log" 2>&1[m
+[32m+[m[32m    local wget_exit=$?[m
+[32m+[m[41m    [m
+[32m+[m[32m    # Читаем последний процент из лога перед остановкой парсера[m
+[32m+[m[32m    if [ -f "$wget_log" ]; then[m
+[32m+[m[32m        local last_line=$(tail -1 "$wget_log" 2>/dev/null)[m
+[32m+[m[32m        if [[ "$last_line" =~ ([0-9]+)% ]]; then[m
+[32m+[m[32m            local final_percent="${BASH_REMATCH[1]}"[m
+[32m+[m[32m            echo "PROGRESS:$current_num:$total_num:DOWNLOADING:$final_percent:$filename"[m
+[32m+[m[32m        fi[m
+[32m+[m[32m    fi[m
+[32m+[m[41m    [m
+[32m+[m[32m    # Останавливаем парсер прогресса[m
+[32m+[m[32m    rm -f "$progress_pid_file" "$wget_log" "$last_percent_file"[m
+[32m+[m[32m    kill $progress_pid 2>/dev/null || true[m
+[32m+[m[32m    wait $progress_pid 2>/dev/null || true[m
+[32m+[m[41m    [m
+[32m+[m[32m    if [ $wget_exit -eq 0 ] && [ -f "$tmpfile" ] && [ -s "$tmpfile" ]; then[m
+         mv -f "$tmpfile" "$filepath"[m
+[31m-        echo "PROGRESS:$current_num:$total_num:COMPLETED:$filename"[m
+[32m+[m[32m        echo "PROGRESS:$current_num:$total_num:COMPLETED:100:$filename"[m
+         echo "SUMMARY:DOWNLOADED:$filename"[m
+         return 0[m
+     else[m
+[31m-        echo "PROGRESS:$current_num:$total_num:FAILED:$filename"[m
+[32m+[m[32m        echo "PROGRESS:$current_num:$total_num:FAILED:0:$filename"[m
+         echo "SUMMARY:FAILED:$filename"[m
+         rm -f "$tmpfile"[m
+         return 1[m
+[1mdiff --git a/services/preset_downloader.py b/services/preset_downloader.py[m
+[1mindex 3b5d115..6ffe971 100644[m
+[1m--- a/services/preset_downloader.py[m
+[1m+++ b/services/preset_downloader.py[m
+[36m@@ -564,29 +564,46 @@[m [mdef download_presets(presets: str = Form(...), lightning_lora: str = Form("false[m
+                             pass[m
+                     elif line.startswith("PROGRESS:"):[m
+                         try:[m
+[31m-                            # Формат: PROGRESS:current:total:status:filename[m
+[31m-                            parts = line.split(":", 4)[m
+[32m+[m[32m                            # Формат: PROGRESS:current:total:status:percent:filename или PROGRESS:current:total:status:filename[m
+[32m+[m[32m                            parts = line.split(":", 5)[m
+                             if len(parts) >= 5:[m
+                                 current_file = int(parts[1])[m
+                                 total = int(parts[2])[m
+                                 status = parts[3][m
+[31m-                                current_filename = parts[4][m
+                                 [m
+[31m-                                # Вычисляем прогресс[m
+[31m-                                if status == "COMPLETED" or status == "SKIP":[m
+[31m-                                    progress = (current_file / total * 100)[m
+[31m-                                elif status == "DOWNLOADING":[m
+[31m-                                    progress = ((current_file - 1) / total * 100)[m
+[32m+[m[32m                                # Проверяем, есть ли процент в формате[m
+[32m+[m[32m                                if len(parts) == 6 and parts[4].isdigit():[m
+[32m+[m[32m                                    # Формат с процентом: PROGRESS:current:total:status:percent:filename[m
+[32m+[m[32m                                    file_percent = int(parts[4])[m
+[32m+[m[32m                                    current_filename = parts[5][m
+[32m+[m[32m                                    # Вычисляем общий прогресс: (current-1)/total + file_percent/(100*total)[m
+[32m+[m[32m                                    progress = ((current_file - 1) / total * 100) + (file_percent / total)[m
+                                 else:[m
+[31m-                                    progress = ((current_file - 1) / total * 100)[m
+[32m+[m[32m                                    # Формат без процента: PROGRESS:current:total:status:filename[m
+[32m+[m[32m                                    current_filename = parts[4][m
+[32m+[m[32m                                    file_percent = 0[m
+[32m+[m[32m                                    # Вычисляем прогресс[m
+[32m+[m[32m                                    if status == "COMPLETED" or status == "SKIP":[m
+[32m+[m[32m                                        progress = (current_file / total * 100)[m
+[32m+[m[32m                                        file_percent = 100[m
+[32m+[m[32m                                    elif status == "DOWNLOADING":[m
+[32m+[m[32m                                        progress = ((current_file - 1) / total * 100) + 0.1  # Минимальный прогресс 0.1%[m
+[32m+[m[32m                                        file_percent = 1[m
+[32m+[m[32m                                    else:[m
+[32m+[m[32m                                        progress = ((current_file - 1) / total * 100)[m
+                                 [m
+                                 # Формируем сообщение[m
+                                 if status == "DOWNLOADING":[m
+[31m-                                    message = f"📥 Скачивание файла {current_file} из {total}: {current_filename}"[m
+[32m+[m[32m                                    if file_percent > 0:[m
+[32m+[m[32m                                        message = f"📥 Скачивание файла {current_file} из {total}: {current_filename} ({file_percent}%)"[m
+[32m+[m[32m                                    else:[m
+[32m+[m[32m                                        message = f"📥 Скачивание файла {current_file} из {total}: {current_filename}"[m
+                                 elif status == "COMPLETED":[m
+                                     message = f"✅ Завершено: {current_filename} ({current_file}/{total})"[m
+                                 elif status == "SKIP":[m
+                                     message = f"⏭️ Пропущено (уже существует): {current_filename} ({current_file}/{total})"[m
+[32m+[m[32m                                elif status == "FAILED":[m
+[32m+[m[32m                                    message = f"❌ Ошибка скачивания: {current_filename} ({current_file}/{total})"[m
+                                 else:[m
+                                     message = f"📥 Обработка файла {current_file} из {total}: {current_filename}"[m
+                                 [m

@@ -31,21 +31,62 @@ download_if_missing() {
         return 0
     fi
 
-    echo "PROGRESS:$current_num:$total_num:DOWNLOADING:$filename"
+    echo "PROGRESS:$current_num:$total_num:DOWNLOADING:1:$filename"
     
     local tmpdir="/workspace/tmp"
     mkdir -p "$tmpdir"
     local tmpfile="$tmpdir/${filename}.part"
+    local wget_log="$tmpdir/wget_${current_num}.log"
+    local progress_pid_file="$tmpdir/progress_${current_num}.pid"
 
-    # Скачиваем файл, весь вывод wget перенаправляем в /dev/null
-    # Прогресс показываем только через наши маркеры
-    if wget --progress=bar:force:noscroll -O "$tmpfile" "$url" >/dev/null 2>&1; then
+    # Запускаем парсер прогресса в фоне
+    local last_percent_file="$tmpdir/last_percent_${current_num}.txt"
+    (
+        local last_reported=0
+        while [ -f "$progress_pid_file" ]; do
+            if [ -f "$wget_log" ]; then
+                # Читаем последнюю строку с процентом из лога
+                local last_line=$(tail -1 "$wget_log" 2>/dev/null)
+                if [[ "$last_line" =~ ([0-9]+)% ]]; then
+                    local percent="${BASH_REMATCH[1]}"
+                    # Выводим только если процент изменился (чтобы не дублировать сообщения)
+                    if [ "$percent" -ne "$last_reported" ]; then
+                        echo "PROGRESS:$current_num:$total_num:DOWNLOADING:$percent:$filename"
+                        last_reported="$percent"
+                    fi
+                fi
+            fi
+            sleep 0.5
+        done
+    ) &
+    local progress_pid=$!
+    echo $progress_pid > "$progress_pid_file"
+
+    # Скачиваем файл
+    wget --progress=bar:force:noscroll -O "$tmpfile" "$url" > "$wget_log" 2>&1
+    local wget_exit=$?
+    
+    # Читаем последний процент из лога перед остановкой парсера
+    if [ -f "$wget_log" ]; then
+        local last_line=$(tail -1 "$wget_log" 2>/dev/null)
+        if [[ "$last_line" =~ ([0-9]+)% ]]; then
+            local final_percent="${BASH_REMATCH[1]}"
+            echo "PROGRESS:$current_num:$total_num:DOWNLOADING:$final_percent:$filename"
+        fi
+    fi
+    
+    # Останавливаем парсер прогресса
+    rm -f "$progress_pid_file" "$wget_log" "$last_percent_file"
+    kill $progress_pid 2>/dev/null || true
+    wait $progress_pid 2>/dev/null || true
+    
+    if [ $wget_exit -eq 0 ] && [ -f "$tmpfile" ] && [ -s "$tmpfile" ]; then
         mv -f "$tmpfile" "$filepath"
-        echo "PROGRESS:$current_num:$total_num:COMPLETED:$filename"
+        echo "PROGRESS:$current_num:$total_num:COMPLETED:100:$filename"
         echo "SUMMARY:DOWNLOADED:$filename"
         return 0
     else
-        echo "PROGRESS:$current_num:$total_num:FAILED:$filename"
+        echo "PROGRESS:$current_num:$total_num:FAILED:0:$filename"
         echo "SUMMARY:FAILED:$filename"
         rm -f "$tmpfile"
         return 1
