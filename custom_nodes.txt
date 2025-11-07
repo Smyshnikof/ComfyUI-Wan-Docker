@@ -29,3 +29,9 @@ https://github.com/Fannovel16/comfyui_controlnet_aux.git
 https://github.com/kijai/ComfyUI-Florence2.git
 https://github.com/kijai/ComfyUI-segment-anything-2
 https://github.com/GACLove/ComfyUI-VFI
+https://github.com/chflame163/ComfyUI_LayerStyle
+https://github.com/M1kep/ComfyLiterals
+https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes
+https://github.com/tritant/ComfyUI_CreaPrompt
+https://github.com/mr-pepe69/ComfyUI-SelectStringFromListWithIndex
+https://github.com/ClownsharkBatwing/RES4LYF

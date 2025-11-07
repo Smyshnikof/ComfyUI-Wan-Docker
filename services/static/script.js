@@ -172,6 +172,8 @@ function downloadPresets() {
 
 function pollStatus(taskId) {
   const progress = document.getElementById('preset-progress');
+  const progressFill = document.getElementById('preset-progress-fill');
+  const progressText = document.getElementById('preset-progress-text');
   const result = document.getElementById('preset-result');
   const btn = document.getElementById('download-presets-btn');
   
@@ -189,9 +191,28 @@ function pollStatus(taskId) {
       btn.disabled = false;
       btn.textContent = '📥 Скачать выбранные пресеты';
     } else if (data.status === 'running') {
-      result.textContent = data.message + ' (проверяем статус...)';
-      // Повторяем через 2 секунды
-      setTimeout(() => pollStatus(taskId), 2000);
+      // Обновляем прогресс-бар
+      const progressPercent = data.progress || 0;
+      progressFill.style.width = progressPercent + '%';
+      
+      // Формируем текст прогресса
+      let progressMessage = data.message || 'Загрузка...';
+      if (data.total_files && data.current_file !== undefined) {
+        progressMessage = `📥 Файл ${data.current_file} из ${data.total_files}`;
+        if (data.current_filename) {
+          const shortName = data.current_filename.length > 50 
+            ? data.current_filename.substring(0, 47) + '...' 
+            : data.current_filename;
+          progressMessage += `: ${shortName}`;
+        }
+        progressMessage += ` (${Math.round(progressPercent)}%)`;
+      }
+      
+      progressText.textContent = progressMessage;
+      result.textContent = data.message || 'Загрузка...';
+      
+      // Повторяем через 1 секунду для более плавного обновления
+      setTimeout(() => pollStatus(taskId), 1000);
     } else {
       result.textContent = '❌ Неизвестный статус: ' + data.message;
       progress.style.display = 'none';

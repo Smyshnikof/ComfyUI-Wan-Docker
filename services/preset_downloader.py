@@ -39,6 +39,12 @@ PRESETS = {
         "size": "~40GB", 
         "time": "15-20 мин"
     },
+    "WAN_I2V_LOOP": {
+        "name": "Wan I2V Loop",
+        "description": "Генерация зацикленного видео из изображения",
+        "size": "~40GB",
+        "time": "15-20 мин"
+    },
     "WAN_ANIMATE": {
         "name": "Wan Animate",
         "description": "Анимация изображений",
@@ -50,6 +56,18 @@ PRESETS = {
         "description": "Генерация видео с помощью первого и последнего кадра",
         "size": "~40GB",
         "time": "15-20 мин"
+    },
+    "WAN_LIGHTX2V": {
+        "name": "Wan LightX2V",
+        "description": "LightX2V модели для генерации видео",
+        "size": "~70GB",
+        "time": "12-18 мин"
+    },
+    "WAN_I2I_REFINER": {
+        "name": "Wan I2I Refiner",
+        "description": "Модели для улучшения изображений (Image-to-Image Refiner)",
+        "size": "~15GB",
+        "time": "8-12 мин"
     }
 }
 
@@ -495,32 +513,133 @@ def download_presets(presets: str = Form(...), lightning_lora: str = Form("false
                 if lightning_lora.lower() == "true":
                     cmd.append("true")
                 
-                result = subprocess.run(
+                # Запускаем процесс с построчным чтением вывода
+                process = subprocess.Popen(
                     cmd,
-                    capture_output=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
                     text=True,
-                    timeout=1800  # 30 минут
+                    bufsize=0,  # Небуферизованный режим для немедленного чтения
+                    universal_newlines=True
                 )
                 
-                if result.returncode == 0:
+                output_lines = []
+                total_files = 0
+                current_file = 0
+                current_filename = ""
+                
+                # Инициализируем статус перед началом
+                download_status[task_id] = {
+                    "status": "running",
+                    "message": f"🚀 Начато скачивание пресетов: {', '.join(presets_list)}",
+                    "progress": 0,
+                    "total_files": 0,
+                    "current_file": 0,
+                    "current_filename": ""
+                }
+                
+                # Читаем вывод построчно
+                for line in process.stdout:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    
+                    output_lines.append(line)
+                    
+                    # Парсим строки прогресса
+                    if line.startswith("TOTAL_FILES:"):
+                        try:
+                            total_files = int(line.split(":")[1])
+                            download_status[task_id] = {
+                                "status": "running",
+                                "message": f"🚀 Начато скачивание пресетов: {', '.join(presets_list)}\n📦 Всего файлов: {total_files}",
+                                "progress": 0,
+                                "total_files": total_files,
+                                "current_file": 0,
+                                "current_filename": ""
+                            }
+                        except:
+                            pass
+                    elif line.startswith("PROGRESS:"):
+                        try:
+                            # Формат: PROGRESS:current:total:message или PROGRESS:current:total:percent:filename
+                            parts = line.split(":", 4)
+                            if len(parts) >= 4:
+                                current_file = int(parts[1])
+                                total = int(parts[2])
+                                if len(parts) == 5 and parts[3].isdigit():
+                                    # Формат с процентом: PROGRESS:current:total:percent:filename
+                                    percent = int(parts[3])
+                                    current_filename = parts[4]
+                                    # Вычисляем общий прогресс: (current-1)/total + percent/(100*total)
+                                    progress = ((current_file - 1) / total * 100) + (percent / total)
+                                else:
+                                    # Формат без процента: PROGRESS:current:total:message
+                                    message = parts[3]
+                                    current_filename = message.split(":")[-1] if ":" in message else message
+                                    # Если файл уже существует или завершен, считаем его как 100%
+                                    if "already exists" in message or "completed" in message:
+                                        progress = (current_file / total * 100)
+                                    else:
+                                        progress = ((current_file - 1) / total * 100)
+                                
+                                download_status[task_id] = {
+                                    "status": "running",
+                                    "message": f"📥 Скачивание файла {current_file} из {total}: {current_filename}",
+                                    "progress": min(progress, 100),
+                                    "total_files": total,
+                                    "current_file": current_file,
+                                    "current_filename": current_filename
+                                }
+                        except Exception as e:
+                            # Если не удалось распарсить, просто обновляем сообщение
+                            download_status[task_id] = {
+                                "status": "running",
+                                "message": line,
+                                "progress": download_status[task_id].get("progress", 0),
+                                "total_files": download_status[task_id].get("total_files", 0),
+                                "current_file": download_status[task_id].get("current_file", 0),
+                                "current_filename": download_status[task_id].get("current_filename", "")
+                            }
+                
+                # Ждем завершения процесса
+                process.wait()
+                
+                if process.returncode == 0:
                     download_status[task_id] = {
                         "status": "completed",
-                        "message": f"✅ Успешно скачаны пресеты: {', '.join(presets_list)}\n\n{result.stdout}"
+                        "message": f"✅ Успешно скачаны пресеты: {', '.join(presets_list)}\n\n" + "\n".join(output_lines[-20:]),  # Последние 20 строк
+                        "progress": 100,
+                        "total_files": total_files,
+                        "current_file": total_files,
+                        "current_filename": ""
                     }
                 else:
                     download_status[task_id] = {
                         "status": "error", 
-                        "message": f"❌ Ошибка скачивания пресетов:\n{result.stderr}"
+                        "message": f"❌ Ошибка скачивания пресетов:\n" + "\n".join(output_lines[-20:]),
+                        "progress": download_status[task_id].get("progress", 0),
+                        "total_files": total_files,
+                        "current_file": current_file,
+                        "current_filename": current_filename
                     }
             except subprocess.TimeoutExpired:
                 download_status[task_id] = {
                     "status": "error",
-                    "message": "❌ Таймаут: Скачивание заняло слишком много времени"
+                    "message": "❌ Таймаут: Скачивание заняло слишком много времени",
+                    "progress": download_status[task_id].get("progress", 0),
+                    "total_files": download_status[task_id].get("total_files", 0),
+                    "current_file": download_status[task_id].get("current_file", 0),
+                    "current_filename": download_status[task_id].get("current_filename", "")
                 }
             except Exception as e:
                 download_status[task_id] = {
                     "status": "error",
-                    "message": f"❌ Ошибка: {str(e)}"
+                    "message": f"❌ Ошибка: {str(e)}",
+                    "progress": download_status[task_id].get("progress", 0),
+                    "total_files": download_status[task_id].get("total_files", 0),
+                    "current_file": download_status[task_id].get("current_file", 0),
+                    "current_filename": download_status[task_id].get("current_filename", "")
                 }
         
         # Запускаем в отдельном потоке
