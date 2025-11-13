@@ -38,7 +38,7 @@ smyshnikof/comfyui-wan:(A)-torch2.8.0-(B)
 
 * **(A)**: `base` - основной образ
   * `base`: ComfyUI + Manager + кастомные ноды + веб-загрузчик пресетов
-* **(B)**: версия CUDA → `cu124`, `cu126`, `cu128`
+* **(B)**: версия CUDA → `cu124`, `cu126`, `cu128`, `cu129`
 
 ---
 
@@ -49,6 +49,7 @@ smyshnikof/comfyui-wan:(A)-torch2.8.0-(B)
 | `smyshnikof/comfyui-wan:base-torch2.8.0-cu124`| ✅ Да         | ✅ Да  | 12.4 |
 | `smyshnikof/comfyui-wan:base-torch2.8.0-cu126`| ✅ Да         | ✅ Да  | 12.6 |
 | `smyshnikof/comfyui-wan:base-torch2.8.0-cu128`| ✅ Да         | ✅ Да  | 12.8 |
+| `smyshnikof/comfyui-wan:base-torch2.8.0-cu129`| ✅ Да         | ✅ Да  | 12.9 |
 
 > 👉 Для переключения: **Edit Pod/Template** → установите `Container Image`.
 
@@ -60,6 +61,7 @@ smyshnikof/comfyui-wan:(A)-torch2.8.0-(B)
 |------------|-------------------|------------|
 | **RTX 5090** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu128` | Требует CUDA 12.8+ для SageAttention2 |
 | **RTX 5080** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu128` | Требует CUDA 12.8+ для SageAttention2 |
+| **Новые GPU с CUDA 12.9** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu129` | Для новых видеокарт с CUDA 12.9 |
 | **RTX 4090** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu126` | Оптимальная производительность |
 | **RTX 4080** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu126` | Отличная совместимость |
 | **RTX 4070** | `smyshnikof/comfyui-wan:base-torch2.8.0-cu124` | Стабильная работа |
