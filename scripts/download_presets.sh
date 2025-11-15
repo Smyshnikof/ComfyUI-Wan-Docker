@@ -153,6 +153,9 @@ for preset in "${PRESETS[@]}"; do
         WAN_CHRONOEDIT)
             TOTAL_FILES=$((TOTAL_FILES + 5))
             ;;
+        WAN_T2V_T2I_BATCH)
+            TOTAL_FILES=$((TOTAL_FILES + 13))
+            ;;
     esac
 done
 
@@ -277,6 +280,22 @@ for preset in "${PRESETS[@]}"; do
             download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors" "/workspace/ComfyUI/models/vae"
             download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors" "/workspace/ComfyUI/models/text_encoders"
             download_with_progress "https://huggingface.co/OreX/Models/resolve/main/WAN/clip_vision_h.safetensors" "/workspace/ComfyUI/models/clip_vision"
+            ;;
+        WAN_T2V_T2I_BATCH)
+            echo "Preset: WAN_T2V_T2I_BATCH (T2V&T2I Batch)"
+            download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/T2V/Wan2_2-T2V-A14B-LOW_fp8_e4m3fn_scaled_KJ.safetensors" "/workspace/ComfyUI/models/diffusion_models"
+            download_with_progress "https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors" "/workspace/ComfyUI/models/text_encoders"
+            download_with_progress "https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors" "/workspace/ComfyUI/models/vae"
+            download_with_progress "https://huggingface.co/spacepxl/Wan2.1-VAE-upscale2x/resolve/main/Wan2.1_VAE_upscale2x_imageonly_real_v1.safetensors" "/workspace/ComfyUI/models/vae"
+            download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_HIGH_fp16.safetensors" "/workspace/ComfyUI/models/loras"
+            download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/LoRAs/Wan22-Lightning/old/Wan2.2-Lightning_T2V-v1.1-A14B-4steps-lora_LOW_fp16.safetensors" "/workspace/ComfyUI/models/loras"
+            download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-250928-dyno/Wan2.2-T2V-A14B-4steps-250928-dyno-high-lightx2v.safetensors" "/workspace/ComfyUI/models/loras"
+            download_with_progress "https://huggingface.co/lightx2v/Wan2.2-Lightning/resolve/main/Wan2.2-T2V-A14B-4steps-lora-250928/low_noise_model.safetensors" "/workspace/ComfyUI/models/loras"
+            download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x-UltraSharp.pth" "/workspace/ComfyUI/models/upscale_models"
+            download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_NMKD-Siax_200k.pth" "/workspace/ComfyUI/models/upscale_models"
+            download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_RealisticRescaler_100000_G.pth" "/workspace/ComfyUI/models/upscale_models"
+            download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_fatal_Anime_500000_G.pth" "/workspace/ComfyUI/models/upscale_models"
+            download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/BSRGAN.pth" "/workspace/ComfyUI/models/upscale_models"
             ;;
         *)
             echo "Не найден пресет WAN для '${preset}', пропускаем."
