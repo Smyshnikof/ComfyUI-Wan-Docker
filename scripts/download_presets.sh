@@ -150,6 +150,9 @@ for preset in "${PRESETS[@]}"; do
         WAN_I2I_REFINER)
             TOTAL_FILES=$((TOTAL_FILES + 8))
             ;;
+        WAN_CHRONOEDIT)
+            TOTAL_FILES=$((TOTAL_FILES + 5))
+            ;;
     esac
 done
 
@@ -266,6 +269,14 @@ for preset in "${PRESETS[@]}"; do
             download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_RealisticRescaler_100000_G.pth" "/workspace/ComfyUI/models/upscale_models"
             download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_fatal_Anime_500000_G.pth" "/workspace/ComfyUI/models/upscale_models"
             download_with_progress "https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/BSRGAN.pth" "/workspace/ComfyUI/models/upscale_models"
+            ;;
+        WAN_CHRONOEDIT)
+            echo "Preset: WAN_CHRONOEDIT (Wan ChronoEdit)"
+            download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/ChronoEdit/Wan2_1-14B-I2V_ChronoEdit_fp8_scaled_KJ.safetensors" "/workspace/ComfyUI/models/diffusion_models"
+            download_with_progress "https://huggingface.co/nvidia/ChronoEdit-14B-Diffusers/resolve/main/lora/chronoedit_distill_lora.safetensors" "/workspace/ComfyUI/models/loras"
+            download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors" "/workspace/ComfyUI/models/vae"
+            download_with_progress "https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors" "/workspace/ComfyUI/models/text_encoders"
+            download_with_progress "https://huggingface.co/OreX/Models/resolve/main/WAN/clip_vision_h.safetensors" "/workspace/ComfyUI/models/clip_vision"
             ;;
         *)
             echo "Не найден пресет WAN для '${preset}', пропускаем."

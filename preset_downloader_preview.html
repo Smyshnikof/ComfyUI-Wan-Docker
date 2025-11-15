@@ -52,12 +52,37 @@
     .progress-text { margin-top:8px; color:var(--muted); font-size:14px; text-align:center; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
     .preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 20px 0; }
-    .preset-card { background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; }
+    .preset-card { background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; }
     .preset-card:hover { border-color: var(--accent); background: #222; }
     .preset-card.selected { border-color: var(--accent); background: rgba(255,255,255,0.1); }
     .preset-name { font-weight: 700; margin-bottom: 8px; color: var(--accent); }
     .preset-desc { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
     .preset-info { font-size: 12px; color: var(--muted); }
+    .video-guide-icon { 
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 22px; 
+      height: 22px; 
+      background: white; 
+      border-radius: 50%; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: black; 
+      font-weight: bold; 
+      font-size: 14px; 
+      text-decoration: none; 
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.3);
+      z-index: 10;
+    }
+    .video-guide-icon:hover { 
+      background: var(--accent); 
+      color: var(--bg); 
+      transform: scale(1.15);
+      box-shadow: 0 0 10px rgba(255,255,255,0.4);
+    }
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
     .tab { padding: 8px 16px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
     .tab.active { background: var(--accent); color: var(--bg); }
@@ -70,6 +95,9 @@
   <div class="wrap">
     <h1 class="title">Загрузчик пресетов и моделей</h1>
     <p class="subtitle">Скачивание пресетов Wan и моделей с HuggingFace</p>
+    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center; color: #22c55e;">
+      <strong>📋 Предпросмотр интерфейса</strong> — Иконки <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; background: white; border-radius: 50%; color: black; font-weight: bold; font-size: 14px; margin: 0 4px;">i</span> рядом с названиями пресетов открывают видео-гайды на YouTube
+    </div>
     
     <div class="tabs">
       <div class="tab active" onclick="switchTab('presets')">🎯 Пресеты Wan</div>
@@ -82,21 +110,30 @@
         <h3>Выберите пресеты для скачивания</h3>
         <div class="preset-grid" id="preset-grid">
           <div class="preset-card" data-preset="WAN_T2V" onclick="togglePreset('WAN_T2V')">
+            <a href="https://youtu.be/9Yg02eaFHJI?si=sJeT5NunkyzdDxqp" target="_blank" rel="noopener noreferrer" class="video-guide-icon" onclick="event.stopPropagation();" title="Видео-гайд">i</a>
             <div class="preset-name">Wan T2V (Text-to-Video)</div>
             <div class="preset-desc">Генерация видео из текста</div>
             <div class="preset-info">Размер: ~40GB • Время: 15-20 мин</div>
           </div>
           <div class="preset-card" data-preset="WAN_T2I" onclick="togglePreset('WAN_T2I')">
+            <a href="https://youtu.be/D032P5gl5Wg?si=VUSoWugV5VI7e_Q3" target="_blank" rel="noopener noreferrer" class="video-guide-icon" onclick="event.stopPropagation();" title="Видео-гайд">i</a>
             <div class="preset-name">Wan T2I (Text-to-Image)</div>
             <div class="preset-desc">Генерация изображений из текста</div>
             <div class="preset-info">Размер: ~18GB • Время: 8-12 мин</div>
           </div>
           <div class="preset-card" data-preset="WAN_I2V" onclick="togglePreset('WAN_I2V')">
+            <a href="https://youtu.be/SUh_25b4zeU?si=p8P-aXOYh5HIaIEW" target="_blank" rel="noopener noreferrer" class="video-guide-icon" onclick="event.stopPropagation();" title="Видео-гайд">i</a>
             <div class="preset-name">Wan I2V (Image-to-Video)</div>
             <div class="preset-desc">Генерация видео из изображения</div>
             <div class="preset-info">Размер: ~40GB • Время: 15-20 мин</div>
           </div>
+          <div class="preset-card" data-preset="WAN_I2V_LOOP" onclick="togglePreset('WAN_I2V_LOOP')">
+            <div class="preset-name">Wan I2V Loop</div>
+            <div class="preset-desc">Генерация зацикленного видео из изображения</div>
+            <div class="preset-info">Размер: ~40GB • Время: 15-20 мин</div>
+          </div>
           <div class="preset-card" data-preset="WAN_ANIMATE" onclick="togglePreset('WAN_ANIMATE')">
+            <a href="https://youtu.be/fUNbH3o_cE0?si=VTa-ljuPPaAngf3L" target="_blank" rel="noopener noreferrer" class="video-guide-icon" onclick="event.stopPropagation();" title="Видео-гайд">i</a>
             <div class="preset-name">Wan Animate</div>
             <div class="preset-desc">Анимация изображений</div>
             <div class="preset-info">Размер: ~30GB • Время: 10-15 мин</div>
@@ -105,6 +142,21 @@
             <div class="preset-name">Wan FLF (First Last Frame)</div>
             <div class="preset-desc">Генерация видео с помощью первого и последнего кадра</div>
             <div class="preset-info">Размер: ~40GB • Время: 15-20 мин</div>
+          </div>
+          <div class="preset-card" data-preset="WAN_LIGHTX2V" onclick="togglePreset('WAN_LIGHTX2V')">
+            <div class="preset-name">Wan LightX2V</div>
+            <div class="preset-desc">LightX2V модели для генерации видео</div>
+            <div class="preset-info">Размер: ~70GB • Время: 12-18 мин</div>
+          </div>
+          <div class="preset-card" data-preset="WAN_I2I_REFINER" onclick="togglePreset('WAN_I2I_REFINER')">
+            <div class="preset-name">Wan I2I Refiner</div>
+            <div class="preset-desc">Модели для улучшения изображений (Image-to-Image Refiner)</div>
+            <div class="preset-info">Размер: ~15GB • Время: 8-12 мин</div>
+          </div>
+          <div class="preset-card" data-preset="WAN_CHRONOEDIT" onclick="togglePreset('WAN_CHRONOEDIT')">
+            <div class="preset-name">ChronoEdit</div>
+            <div class="preset-desc">Редактирование изображений через создание видео</div>
+            <div class="preset-info">Размер: ~25GB • Время: 10-15 мин</div>
           </div>
         </div>
         <div class="row-full">
@@ -198,7 +250,7 @@
             <div style="margin-top: 8px; padding: 12px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; font-size: 12px; word-wrap: break-word;">
               <div style="color: #4a9eff; font-weight: 600; margin-bottom: 8px;">📋 Как создать токен:</div>
               <div style="color: #ccc; line-height: 1.4;">
-                1. Перейдите по ссылке: <a href="https://huggingface.co/settings/tokens" target="_blank" style="color: #4a9eff; text-decoration: underline;">https://huggingface.co/settings/tokens</a><br>
+                1. Перейдите по ссылке: <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style="color: #4a9eff; text-decoration: underline;">https://huggingface.co/settings/tokens</a><br>
                 2. Нажмите "New token"<br>
                 3. Выберите "Read" (достаточно для скачивания)<br>
                 4. Введите название токена<br>

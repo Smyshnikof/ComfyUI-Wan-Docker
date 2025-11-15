@@ -106,6 +106,13 @@ PRESET_FILES = {
         ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_fatal_Anime_500000_G.pth", "upscale_models", None),
         ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/BSRGAN.pth", "upscale_models", None),
     ],
+    "WAN_CHRONOEDIT": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy_fp8_scaled/resolve/main/ChronoEdit/Wan2_1-14B-I2V_ChronoEdit_fp8_scaled_KJ.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/nvidia/ChronoEdit-14B-Diffusers/resolve/main/lora/chronoedit_distill_lora.safetensors", "loras", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors", "vae", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+        ("https://huggingface.co/OreX/Models/resolve/main/WAN/clip_vision_h.safetensors", "clip_vision", None),
+    ],
 }
 
 # Доступные пресеты
@@ -114,19 +121,22 @@ PRESETS = {
         "name": "Wan T2V (Text-to-Video)",
         "description": "Генерация видео из текста",
         "size": "~40GB",
-        "time": "15-20 мин"
+        "time": "15-20 мин",
+        "video_guide": "https://youtu.be/9Yg02eaFHJI?si=sJeT5NunkyzdDxqp"
     },
     "WAN_T2I": {
         "name": "Wan T2I (Text-to-Image)", 
         "description": "Генерация изображений из текста",
         "size": "~18GB",
-        "time": "8-12 мин"
+        "time": "8-12 мин",
+        "video_guide": "https://youtu.be/D032P5gl5Wg?si=VUSoWugV5VI7e_Q3"
     },
     "WAN_I2V": {
         "name": "Wan I2V (Image-to-Video)",
         "description": "Генерация видео из изображения",
         "size": "~40GB", 
-        "time": "15-20 мин"
+        "time": "15-20 мин",
+        "video_guide": "https://youtu.be/SUh_25b4zeU?si=p8P-aXOYh5HIaIEW"
     },
     "WAN_I2V_LOOP": {
         "name": "Wan I2V Loop",
@@ -138,7 +148,8 @@ PRESETS = {
         "name": "Wan Animate",
         "description": "Анимация изображений",
         "size": "~30GB",
-        "time": "10-15 мин"
+        "time": "10-15 мин",
+        "video_guide": "https://youtu.be/fUNbH3o_cE0?si=VTa-ljuPPaAngf3L"
     },
     "WAN_FLF": {
         "name": "Wan FLF (First Last Frame)",
@@ -157,6 +168,12 @@ PRESETS = {
         "description": "Модели для улучшения изображений (Image-to-Image Refiner)",
         "size": "~15GB",
         "time": "8-12 мин"
+    },
+    "WAN_CHRONOEDIT": {
+        "name": "ChronoEdit",
+        "description": "Редактирование изображений через создание видео",
+        "size": "~25GB",
+        "time": "10-15 мин"
     }
 }
 
@@ -215,12 +232,37 @@ INDEX_HTML = """
     .progress-text { margin-top:8px; color:var(--muted); font-size:14px; text-align:center; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; }
     .preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 20px 0; }
-    .preset-card { background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; }
+    .preset-card { background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; }
     .preset-card:hover { border-color: var(--accent); background: #222; }
     .preset-card.selected { border-color: var(--accent); background: rgba(255,255,255,0.1); }
     .preset-name { font-weight: 700; margin-bottom: 8px; color: var(--accent); }
     .preset-desc { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
     .preset-info { font-size: 12px; color: var(--muted); }
+    .video-guide-icon { 
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 22px; 
+      height: 22px; 
+      background: white; 
+      border-radius: 50%; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      color: black; 
+      font-weight: bold; 
+      font-size: 14px; 
+      text-decoration: none; 
+      transition: all 0.2s;
+      border: 1px solid rgba(255,255,255,0.3);
+      z-index: 10;
+    }
+    .video-guide-icon:hover { 
+      background: var(--accent); 
+      color: var(--bg); 
+      transform: scale(1.15);
+      box-shadow: 0 0 10px rgba(255,255,255,0.4);
+    }
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
     .tab { padding: 8px 16px; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
     .tab.active { background: var(--accent); color: var(--bg); }
@@ -557,8 +599,13 @@ INDEX_HTML = """
 def generate_presets_html():
     html = ""
     for preset_id, preset_info in PRESETS.items():
+        video_guide_html = ""
+        if preset_info.get('video_guide'):
+            video_guide_html = f'<a href="{preset_info["video_guide"]}" target="_blank" rel="noopener noreferrer" class="video-guide-icon" onclick="event.stopPropagation();" title="Видео-гайд">i</a>'
+        
         html += f'''
         <div class="preset-card" data-preset="{preset_id}" onclick="togglePreset('{preset_id}')">
+          {video_guide_html}
           <div class="preset-name">{preset_info['name']}</div>
           <div class="preset-desc">{preset_info['description']}</div>
           <div class="preset-info">Размер: {preset_info['size']} • Время: {preset_info['time']}</div>

@@ -35,3 +35,7 @@ https://github.com/Suzie1/ComfyUI_Comfyroll_CustomNodes
 https://github.com/tritant/ComfyUI_CreaPrompt
 https://github.com/mr-pepe69/ComfyUI-SelectStringFromListWithIndex
 https://github.com/ClownsharkBatwing/RES4LYF
+https://github.com/jamesWalker55/comfyui-various
+https://github.com/Smyshnikof/ComfyUI-PresetDownloadManager
+https://github.com/ltdrdata/was-node-suite-comfyui
+https://github.com/1038lab/ComfyUI-QwenVL
