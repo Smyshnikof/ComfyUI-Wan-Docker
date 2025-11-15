@@ -39,3 +39,8 @@ https://github.com/jamesWalker55/comfyui-various
 https://github.com/Smyshnikof/ComfyUI-PresetDownloadManager
 https://github.com/ltdrdata/was-node-suite-comfyui
 https://github.com/1038lab/ComfyUI-QwenVL
+https://github.com/1038lab/ComfyUI-RMBG
+https://github.com/wallen0322/ComfyUI-Wan22FMLF
+https://github.com/princepainter/ComfyUI-PainterI2V
+https://github.com/MeeeyoAI/ComfyUI_StringOps
+https://github.com/IuvenisSapiens/ComfyUI_Qwen3-VL-Instruct
