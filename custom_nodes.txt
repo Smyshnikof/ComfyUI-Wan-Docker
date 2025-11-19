@@ -44,3 +44,5 @@ https://github.com/wallen0322/ComfyUI-Wan22FMLF
 https://github.com/princepainter/ComfyUI-PainterI2V
 https://github.com/MeeeyoAI/ComfyUI_StringOps
 https://github.com/IuvenisSapiens/ComfyUI_Qwen3-VL-Instruct
+https://github.com/spacepxl/ComfyUI-VAE-Utils
+https://github.com/kijai/ComfyUI-MelBandRoFormer

@@ -128,6 +128,15 @@ PRESET_FILES = {
         ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/4x_fatal_Anime_500000_G.pth", "upscale_models", None),
         ("https://huggingface.co/uwg/upscaler/resolve/main/ESRGAN/BSRGAN.pth", "upscale_models", None),
     ],
+    "WAN_INFINITETALK": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/InfiniteTalk/Wan2_1-InfiniTetalk-Single_fp16.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors", "loras", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors", "clip_vision", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+        ("https://huggingface.co/Kijai/MelBandRoFormer_comfy/resolve/main/MelBandRoformer_fp32.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+    ],
 }
 
 # Доступные пресеты
@@ -195,6 +204,12 @@ PRESETS = {
         "description": "Параллельная генерация изображений и видео",
         "size": "~20GB",
         "time": "8-12 мин"
+    },
+    "WAN_INFINITETALK": {
+        "name": "Wan InfiniteTalk. LipSync говорящие аватары",
+        "description": "LipSync говорящие аватары",
+        "size": "~35GB",
+        "time": "12-18 мин"
     }
 }
 
