@@ -137,6 +137,14 @@ PRESET_FILES = {
         ("https://huggingface.co/Kijai/MelBandRoFormer_comfy/resolve/main/MelBandRoformer_fp32.safetensors", "diffusion_models", None),
         ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
     ],
+    "WAN_2_1_ALPHA": [
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_fp8_scaled.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/loras/wan_alpha_2.1_rgba_lora.safetensors", "loras", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_alpha_2.1_vae_rgb_channel.safetensors", "vae", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_alpha_2.1_vae_alpha_channel.safetensors", "vae", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_T2V_14B_cfg_step_distill_v2_lora_rank64_bf16.safetensors", "loras", None),
+    ],
 }
 
 # Доступные пресеты
@@ -206,10 +214,16 @@ PRESETS = {
         "time": "8-12 мин"
     },
     "WAN_INFINITETALK": {
-        "name": "Wan InfiniteTalk. LipSync говорящие аватары",
+        "name": "Wan InfiniteTalk",
         "description": "LipSync говорящие аватары",
         "size": "~35GB",
         "time": "12-18 мин"
+    },
+    "WAN_2_1_ALPHA": {
+        "name": "Wan 2.1 Alpha",
+        "description": "Генерация видео из текста с поддержкой альфа канала",
+        "size": "~25GB",
+        "time": "10-15 мин"
     }
 }
 
