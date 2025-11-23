@@ -145,6 +145,12 @@ PRESET_FILES = {
         ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/vae/wan_alpha_2.1_vae_alpha_channel.safetensors", "vae", None),
         ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_T2V_14B_cfg_step_distill_v2_lora_rank64_bf16.safetensors", "loras", None),
     ],
+    "WAN_REMIX_I2V": [
+        ("https://huggingface.co/FX-FeiHou/wan2.2-Remix/resolve/main/NSFW/Wan2.2_Remix_NSFW_i2v_14b_high_lighting_v2.0.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/FX-FeiHou/wan2.2-Remix/resolve/main/NSFW/Wan2.2_Remix_NSFW_i2v_14b_low_lighting_v2.0.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/NSFW-API/NSFW-Wan-UMT5-XXL/resolve/main/nsfw_wan_umt5-xxl_fp8_scaled.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/vae/wan_2.1_vae.safetensors", "vae", None),
+    ],
 }
 
 # Доступные пресеты
@@ -224,6 +230,12 @@ PRESETS = {
         "description": "Генерация видео из текста с поддержкой альфа канала",
         "size": "~25GB",
         "time": "10-15 мин"
+    },
+    "WAN_REMIX_I2V": {
+        "name": "Wan Remix I2V",
+        "description": "Креативная модель для генерации видео с реалистичными движениеми",
+        "size": "~30GB",
+        "time": "12-18 мин"
     }
 }
 
