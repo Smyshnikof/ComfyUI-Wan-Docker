@@ -46,3 +46,5 @@ https://github.com/MeeeyoAI/ComfyUI_StringOps
 https://github.com/IuvenisSapiens/ComfyUI_Qwen3-VL-Instruct
 https://github.com/spacepxl/ComfyUI-VAE-Utils
 https://github.com/kijai/ComfyUI-MelBandRoFormer
+https://github.com/kijai/ComfyUI-MMAudio
+https://github.com/kijai/ComfyUI-WanAnimatePreprocess
