@@ -169,6 +169,15 @@ PRESET_FILES = {
         ("https://huggingface.co/Wan-AI/Wan2.2-Animate-14B/resolve/main/process_checkpoint/det/yolov10m.onnx", "detection", None),
         ("https://huggingface.co/JunkyByte/easy_ViTPose/resolve/main/onnx/wholebody/vitpose-l-wholebody.onnx", "detection", None),
     ],
+    "WAN_ANIMATE_SCAIL": [
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/SCAIL/Wan21-14B-SCAIL-preview_comfy_bf16.safetensors", "diffusion_models", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Wan2_1_VAE_bf16.safetensors", "vae", None),
+        ("https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/clip_vision/clip_vision_h.safetensors", "clip_vision", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/umt5-xxl-enc-bf16.safetensors", "text_encoders", None),
+        ("https://huggingface.co/Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors", "loras", None),
+        ("https://huggingface.co/Wan-AI/Wan2.2-Animate-14B/resolve/main/process_checkpoint/det/yolov10m.onnx", "detection", None),
+        ("https://huggingface.co/JunkyByte/easy_ViTPose/resolve/main/onnx/wholebody/vitpose-l-wholebody.onnx", "detection", None),
+    ],
 }
 
 # Доступные пресеты
@@ -264,6 +273,12 @@ PRESETS = {
     "WAN_ANIMATE_ONETOALL": {
         "name": "Wan Animate OneToAll",
         "description": "Согласованая анимация без идеального референса",
+        "size": "~30GB",
+        "time": "12-18 мин"
+    },
+    "WAN_ANIMATE_SCAIL": {
+        "name": "Wan Animate SCAIL",
+        "description": "Контроль позы, лица, рук без масок",
         "size": "~30GB",
         "time": "12-18 мин"
     }
