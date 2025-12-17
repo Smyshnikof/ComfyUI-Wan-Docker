@@ -48,3 +48,4 @@ https://github.com/spacepxl/ComfyUI-VAE-Utils
 https://github.com/kijai/ComfyUI-MelBandRoFormer
 https://github.com/kijai/ComfyUI-MMAudio
 https://github.com/kijai/ComfyUI-WanAnimatePreprocess
+https://github.com/kijai/ComfyUI-SCAIL-Pose

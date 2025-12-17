@@ -279,7 +279,7 @@ PRESETS = {
     "WAN_ANIMATE_SCAIL": {
         "name": "Wan Animate SCAIL",
         "description": "Контроль позы, лица, рук без масок",
-        "size": "~30GB",
+        "size": "~40GB",
         "time": "12-18 мин"
     }
 }
